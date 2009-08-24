@@ -39,6 +39,7 @@
 #define LANG_PHP	8
 #define LANG_CSHAPR	9
 #define LANG_AS		10
+#define LANG_HSP	11
 
 #endif /* global */
 
@@ -107,6 +108,7 @@ private LANGMAP langmap[] = {
   { LANG_PHP, "php", ".php", ".phpy" },
   { LANG_CSHARP, "csharp", ".cs", ".csy" },
   { LANG_AS, "as", ".as", ".asy" },
+  { LANG_HSP, "hsp", ".hsp", ".hspy" },
   { -1, NULL, NULL, NULL }
 };
 
@@ -369,7 +371,7 @@ void print_array(short *p, int n, char *indent)
       fprintf(ofp, "%s", indent);
     fprintf(ofp, i + 1 == n ? "%5d" : "%5d,", p[i]);
     if (++col == 10) {
-      if(get_lang_id() == LANG_PYTHON)
+      if(get_lang_id() == LANG_PYTHON || get_lang_id() == LANG_HSP)
         fprintf(ofp, " \\");
       fprintf(ofp, "\n");
       col = 0;
@@ -572,19 +574,33 @@ void gen_list_var(char *indent, char *var)
     int nl = 0;
     for (i = 0; i < nterms; i++) {
       if (ctermindex[i] >= 0) {
-        if (nl++) fprintf(ofp, ",\n");
+        if (nl++) {
+          if ( get_lang_id() == LANG_HSP )
+            fprintf(ofp, ",\\\n" );
+          else
+            fprintf(ofp, ",\n");
+        }
         fprintf(ofp, "%s\"%s\"", indent, quote(gsym[i]->name));
       }
     }
+    if ( get_lang_id() == LANG_HSP )
+        fprintf(ofp, "\\" );
     fprintf(ofp, "\n");
   }
   else if (strcmp(var, "nonterminals") == 0) {
     int i;
     int nl = 0;
     for (i = 0; i < nnonts; i++) {
-      if (nl++) fprintf(ofp, ",\n");
+      if (nl++) {
+        if ( get_lang_id() == LANG_HSP )
+          fprintf(ofp, ",\\\n" );
+        else
+          fprintf(ofp, ",\n");
+      }
       fprintf(ofp, "%s\"%s\"", indent, quote(gsym[NB + i]->name));
     }
+    if ( get_lang_id() == LANG_HSP )
+        fprintf(ofp, "\\" );
     fprintf(ofp, "\n");
   }
   else {
@@ -914,7 +930,10 @@ global void parser_generate()
             fprintf(ofp, " /* empty */");
           for (; *s != 0; s++)
             fprintf(ofp, " %s", quote(gsym[*s]->name));
-          fputs(i + 1 == nprods ? "\"\n" : "\",\n", ofp);
+          if ( get_lang_id() == LANG_HSP )
+            fputs(i + 1 == nprods ? "\"\n" : "\",\\\n", ofp);
+          else
+            fputs(i + 1 == nprods ? "\"\n" : "\",\n", ofp);
         }
       }
       else if (metamatch(p, "listvar")) {

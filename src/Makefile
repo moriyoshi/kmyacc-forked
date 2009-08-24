@@ -50,6 +50,7 @@ install: $(PROGRAM)
 	$(INSTALL) kmyacc.py.parser $(PARLIB)
 	$(INSTALL) kmyacc.php.parser $(PARLIB)
 	$(INSTALL) kmyacc.as.parser $(PARLIB)
+	$(INSTALL) kmyacc.hsp.parser $(PARLIB)
 
 
 

@@ -1,0 +1,533 @@
+$semval($) yyval
+$semval($,%t) yyval
+$semval(%n) yysemval%n
+$semval(%n,%t) yysemval%n
+$include
+
+/* Prototype file of HSP parser.
+Written by fujidig
+This file is PUBLIC DOMAIN. */
+
+
+$tokenval
+#const %s %n
+$endtokenval
+
+#define yyclearin if 1{yychar = -1}
+#define yyerrok if 1{yyerrflag = 0}
+#define YYRECOVERING (yyerrflag != 0)
+
+#define YYACCEPT  return (0)
+#define YYABORT  return (1)
+#define YYERR  if 1{yyparseerror = 1}
+
+$if -t
+yydebug = 1
+yyDumpParseTree = 0
+yydense = 0
+$endif
+
+#define yyparse gosub *_yyparse
+
+/* code after %% in *.hspy */
+$tailcode
+
+$if -t
+
+#module yyparsetree id, is_leaf, kids, value
+
+#define last_node (nodes(length(nodes)-1))
+
+#modfunc yynode_init int _id, array stack, int from, int len
+    is_leaf = 0
+    id = _id
+    dimtype kids, 5, len
+    repeat len
+        kids( cnt ) = stack( from + cnt )
+    loop
+    return
+#modfunc yyleaf_init int _id, var _value
+    is_leaf = 1
+    id = _id
+    value = _value
+    return
+#modfunc yyleaf_init2 int _id
+    is_leaf = 1
+    id = _id
+    dimtype value, 5
+    return
+#deffunc yynode_new var ret, int _id, array stack, int from, int len
+    newmod nodes, yyparsetree
+    yynode_init last_node, _id, stack, from, len
+    ret = last_node
+    return
+#deffunc yyleaf_new var ret, int _id, var _value
+    newmod nodes, yyparsetree
+    yyleaf_init last_node, _id, _value
+    ret = last_node
+    return
+#deffunc yyleaf_new2 var ret, int _id
+    newmod nodes, yyparsetree
+    yyleaf_init2 last_node, _id
+    ret = last_node
+    return
+
+#modfunc yynode_appendkids array stack, int from, int len
+    n = length( kids )
+    if varuse( kids.0 ) == 0 : n = 0
+    repeat len
+        kids( n + cnt ) = stack( from + cnt )
+    loop
+    return
+#defcfunc yyparsetree_tostring modvar yyparsetree@
+    if is_leaf {
+        if 2 <= vartype( value ) && vartype( value ) <= 4 {
+            return yyterminals@( id ) + "[" + str( value ) + "]"
+        }
+        return yyterminals@( id )
+    }
+    buf = ""
+    buf += "("
+    buf += yynonterminals@( id )
+    foreach kids
+        buf += " "
+        buf += yyparsetree_tostring( kids.cnt )
+    loop
+    buf += ")"
+    return buf
+#modfunc yyparsetree_prettyprintx str head, int last, local head2
+    head2 = head
+    if head != "" {
+        if last {
+            head2 = head + " +-" /* L */
+        } else {
+            head2 = head + " +-" /* T-rotated-left */
+        }
+    }
+    if is_leaf {
+        mes head2 + yyparsetree_tostring( thismod )
+        return
+    }
+    mes head2 + yynonterminals@( id )
+    head2 = head
+    if last : head2 += "   " : else : head2 += " | "
+    foreach kids
+        if yydense@ == 0 : mes head2 + " | "
+        yyparsetree_prettyprintx kids( cnt ), head2, cnt + 1 == length( kids )
+    loop
+    return
+#modfunc yyparsetree_prettyprint
+    yyparsetree_prettyprintx thismod, "", 1
+    return
+#global
+
+#define _yyterminals \
+$listvar terminals \
+, "???"
+
+#define _yynonterminals \
+$listvar nonterminals \
+, "???"
+
+if 0 {
+#deffunc yytokname int yyxprm
+    switch yyxprm
+    $switch-for-token-name
+    swend
+    return "???"
+}
+
+#define _yyproduction \
+$production-strings
+
+/* Traditional Debug Mode */
+
+#define YYTRACE_DCL /* empty */
+
+#define YYTRACE_NEWSTATE(%1, %2) \
+    if yydebug { \
+        if (%2) < 0 { \
+            mes "%% State "+(%1)+", Lookahead --none--" \
+        } else { \
+            mes "%% State "+(%1)+", Lookahead "+yyterminals( %2 ) \
+        } \
+    }
+
+#define YYTRACE_READ(%1) \
+    if yydebug { mes "%% Reading " + yyterminals( %1 ) }
+
+#define YYTRACE_SHIFT(%1) \
+    if yydebug { mes "%% Shift " + yyterminals( %1 ) }
+
+#define YYTRACE_ACCEPT \
+    if yydebug { mes "%% Accepted." }
+
+#define YYTRACE_REDUCE(%1) \
+    if yydebug { mes "%% Reduce by ("+%1+") " + yyproduction( %1 ) }
+
+#define YYTRACE_POP(%1) \
+    if yydebug { mes "%% Recovering, uncovers state " + %1 }
+
+#define YYTRACE_DISCARD(%1) \
+    if yydebug { mes "%% Discard " +  yyterminals( %1 ) }
+
+$endif
+
+#define _yytranslate \
+$listvar yytranslate
+
+#define YYBADCH $(YYBADCH)
+#define YYMAXLEX $(YYMAXLEX)
+#define YYTERMS $(YYTERMS)
+#define YYNONTERMS $(YYNONTERMS)
+
+#define _yyaction \
+$listvar yyaction
+
+#define YYLAST $(YYLAST)
+
+#define _yycheck \
+$listvar yycheck
+
+#define _yybase \
+$listvar yybase
+
+#define YY2TBLSTATE $(YY2TBLSTATE)
+
+#define _yydef \
+$listvar yydefault
+
+#define _yygoto \
+$listvar yygoto
+
+#define YYGLAST $(YYGLAST)
+
+#define _yygcheck \
+$listvar yygcheck
+
+#define _yygbase \
+$listvar yygbase
+
+#define _yygdefault \
+$listvar yygdefault
+
+#define _yylhs \
+$listvar yylhs
+
+#define _yylen \
+$listvar yylen
+
+$if -a
+$reduce
+*yyact%n
+    %b
+    return
+$endreduce
+*yyactnull : return
+
+#define _yyacttbl \
+$reduce
+*yyact%n,\
+$noact
+*yyactnull,\
+$endreduce
+$endif
+*yyactnull
+
+#define YYSTATES $(YYSTATES)
+#define YYNLSTATES $(YYNLSTATES)
+#define YYINTERRTOK $(YYINTERRTOK)
+#define YYUNEXPECTED $(YYUNEXPECTED)
+#define YYDEFAULT $(YYDEFAULT)
+
+#module yysemval val
+#modinit var _val
+    val = _val
+    return
+#modfunc yygetsemval var _val
+    _val = val
+    return
+#global
+
+if 0 {
+*_yyparse
+
+    if yyxinited == 0 {
+        yyxinited = 1
+$if -t
+        yyterminals = _yyterminals
+        yynonterminals = _yynonterminals
+        yyproduction = _yyproduction
+$endif
+        yytranslate = _yytranslate
+        yyaction = _yyaction
+        yycheck = _yycheck
+        yybase = _yybase
+        yydef = _yydef
+        yygoto = _yygoto
+        yygcheck = _yygcheck
+        yygbase = _yygbase
+        yygdefault = _yygdefault
+        yylhs = _yylhs
+        yylen = _yylen
+$if -a
+        yyacttbl = _yyacttbl
+$endif
+    }
+
+
+    dimtype yyastk, 5
+    dim yysstk
+
+$if -t
+    if yyDumpParseTree : dimtype yyPTStack, 5
+$endif
+
+    yystate = 0
+    yychar = -1
+    yychar1 = yychar
+
+$if -t
+    YYTRACE_DCL
+$endif
+    yysp = 0
+    yysstk( yysp ) = 0
+    newmod yyastk, yysemval, yysp // dummy
+    yyerrflag = 0
+    while 1
+$if -t
+        YYTRACE_NEWSTATE yystate, yychar1
+$endif
+
+        if yybase( yystate ) == 0 {
+            yyn = yydef( yystate )
+        } else {
+            if yychar < 0 {
+                dimtype yylval, 5
+                gosub *yylex
+                yychar = stat
+                if yychar <= 0 : yychar = 0
+                if yychar < YYMAXLEX : yychar1 = yytranslate( yychar ) : else : yychar1 = YYBADCH
+$if -t
+                YYTRACE_READ yychar1
+$endif
+            }
+
+            yyn = yybase( yystate ) + yychar1
+            yyxgonext = yyn >= 0 && yyn < YYLAST
+            if yyxgonext : yyxgonext = yycheck( yyn ) == yychar1
+            if yyxgonext == 0 {
+                yyxgonext = yystate < YY2TBLSTATE
+                if yyxgonext {
+                    yyn = yybase( yystate + YYNLSTATES ) + yychar1
+                    yyxgonext = yyn >= 0 && yyn < YYLAST
+                    if yyxgonext : yyxgonext = yycheck( yyn ) == yychar1
+                }
+            }
+            if yyxgonext {
+                yyn = yyaction( yyn )
+                yyxgonext = yyn != YYDEFAULT
+            }
+            if yyxgonext {
+                /*
+                 * >= YYNLSTATE: shift and reduce
+                 * > 0: shift
+                 * = 0: accept
+                 * < 0: reduce
+                 * = -YYUNEXPECTED: error
+                 */
+                if yyn > 0 {
+                    /* shift */
+
+$if -t
+                    YYTRACE_SHIFT yychar1
+$endif
+
+                    yysp++
+
+                    yystate = yyn
+                    yysstk( yysp ) = yystate
+                    newmod yyastk, yysemval, yylval
+
+$if -t
+                   if yyDumpParseTree {
+                       yyleaf_new yyPTStack( yysp ), yychar1, yylval
+                   }
+$endif
+
+                    yychar = -1
+                    yychar1 = yychar
+
+                    if yyerrflag > 0 : yyerrflag--
+                    if yyn < YYNLSTATES : _continue
+
+                    /* yyn >= YYNLSTATES means shift-and-reduce */
+                    yyn -= YYNLSTATES
+                } else {
+                    yyn = -yyn
+                }
+            } else {
+                yyn = yydef( yystate )
+            }
+        }
+
+        while 1
+            /* reduce/error */
+            if yyn == 0 {
+                /* accept */
+
+$if -t
+                YYTRACE_ACCEPT
+                if yyDumpParseTree {
+                    yyparsetree_prettyprint yyPTStack( yysp )
+                }
+$endif
+
+                return 0
+            }
+            yyparseerror = 1
+            if yyn != YYUNEXPECTED {
+                /* reduce */
+                yyparseerror = 0
+                yyl = yylen( yyn )
+
+                switch yyl
+                case 16 : yygetsemval yyastk( yysp-yyl+16 ), yysemval16
+                case 15 : yygetsemval yyastk( yysp-yyl+15 ), yysemval15
+                case 14 : yygetsemval yyastk( yysp-yyl+14 ), yysemval14
+                case 13 : yygetsemval yyastk( yysp-yyl+13 ), yysemval13
+                case 12 : yygetsemval yyastk( yysp-yyl+12 ), yysemval12
+                case 11 : yygetsemval yyastk( yysp-yyl+11 ), yysemval11
+                case 10 : yygetsemval yyastk( yysp-yyl+10 ), yysemval10
+                case  9 : yygetsemval yyastk( yysp-yyl+ 9 ), yysemval9
+                case  8 : yygetsemval yyastk( yysp-yyl+ 8 ), yysemval8
+                case  7 : yygetsemval yyastk( yysp-yyl+ 7 ), yysemval7
+                case  6 : yygetsemval yyastk( yysp-yyl+ 6 ), yysemval6
+                case  5 : yygetsemval yyastk( yysp-yyl+ 5 ), yysemval5
+                case  4 : yygetsemval yyastk( yysp-yyl+ 4 ), yysemval4
+                case  3 : yygetsemval yyastk( yysp-yyl+ 3 ), yysemval3
+                case  2 : yygetsemval yyastk( yysp-yyl+ 2 ), yysemval2
+                case  1 : yygetsemval yyastk( yysp-yyl+ 1 ), yysemval1
+                swend
+
+                if yyl >= 1 {
+                    yyval = yysemval1
+                } else {
+                    dimtype yyval, 5 // null
+                }
+
+$if -t
+                YYTRACE_REDUCE yyn
+$endif
+
+                yylrec = 0
+                /* Following line will be replaced by reduce actions */
+$if -a
+                gosub yyacttbl( yyn )
+$endif
+$ifnot -a
+                switch yyn
+$reduce
+                case %n
+                    %b
+                    swbreak
+$endreduce
+                swend
+$endif
+                if yyparseerror == 0 {
+$if -t
+                    if yyDumpParseTree {
+                        if yylrec {
+                            yynode_appendkids yyPTStack( yysp-yyl+1 ), yyPTStack, yysp-yyl+2, yyl-1
+                        } else {
+                            yynode_new yyPTStack( yysp-yyl+1 ), yylhs( yyn ), yyPTStack, yysp-yyl+1, yyl
+                        }
+                    }
+$endif
+                    /* Goto - shift nonterminal */
+                    repeat yyl
+                        delmod yyastk( yysp - cnt )
+                    loop
+                    yysp -= yyl
+                    yyn = yylhs( yyn )
+                    yyp = yygbase( yyn ) + yysstk( yysp )
+                    yyxgonext = yyp >= 0 && yyp < YYGLAST
+                    if yyxgonext : yyxgonext = yygcheck( yyp ) == yyn
+                    if yyxgonext {
+                        yystate = yygoto( yyp )
+                    } else {
+                        yystate = yygdefault( yyn )
+                    }
+                    yysp++
+
+                    yysstk( yysp ) = yystate
+                    newmod yyastk, yysemval, yyval
+                }
+            }
+            if yyparseerror {
+                /* error */
+                switch yyerrflag
+                case 0
+                    yyerrmsg = "syntax error"
+                    gosub *yyerror
+                case 1
+                case 2
+                    yyerrflag = 3
+                    /* Pop until error-expecting state uncovered */
+
+                    while 1
+                        yyn = yybase( yystate ) + YYINTERRTOK
+                        yyxgonext = yyn >= 0 && yyn < YYLAST
+                        if yyxgonext : yyxgonext = yycheck( yyn ) == YYINTERRTOK
+                        if yyxgonext {
+                            _break
+                        }
+                        if yystate < YY2TBLSTATE {
+                            yyn = yybase( yystate + YYNLSTATES ) + YYINTERRTOK
+                            yyxgonext = yyn >= 0 && yyn < YYLAST
+                            if yyxgonext : yyxgonext = yycheck( yyn ) == YYINTERRTOK
+                            if yyxgonext {
+                                _break
+                            }
+                        }
+                        if yysp <= 0 : return 1
+                        delmod yyastk( yysp )
+                        yysp --
+                        yystate = yysstk( yysp )
+$if -t
+                        YYTRACE_POP yystate
+$endif
+                    wend
+                    yyn = yyaction( yyn )
+$if -t
+                    YYTRACE_SHIFT YYINTERRTOK
+$endif
+
+                    yysp ++
+                    yystate = yyn
+                    yysstk( yysp ) = yyn
+                    newmod yyastk, yysemval, yysp // dummy
+$if -t
+                    if yyDumpParseTree {
+                        yyleaf_new2 yyPTStack( yysp ), YYINTERRTOK
+                    }
+$endif
+                    swbreak
+                case 3
+$if -t
+                    YYTRACE_DISCARD yychar1
+$endif
+                    if yychar1 == 0 : return 1
+                    yychar = -1
+                    yychar1 = yychar
+                    swbreak
+                swend
+            }
+
+            if yystate < YYNLSTATES : _break
+            /* >= YYNLSTATES means shift-and-reduce */
+            yyn = yystate - YYNLSTATES
+        wend
+    wend
+    return
+}

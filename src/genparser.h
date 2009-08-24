@@ -13,6 +13,7 @@
 #define LANG_PHP	8
 #define LANG_CSHARP 9
 #define LANG_AS		10
+#define LANG_HSP	11
 
 extern char *get_lang_name(void);
 extern int get_lang_id(void);

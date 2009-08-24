@@ -1,0 +1,70 @@
+/*
+ * calculator
+ */
+
+%token NUMBER
+
+%left '+' '-'
+%left '*' '/'
+
+%%
+
+start:	lines;
+
+lines: /* empty */
+	| lines line { yylrec++ }
+        ;
+
+line	: expr '\n' { mes $1 }
+	| '\n' { mes "(empty line ignored)" }
+	| error '\n'
+	;
+
+expr	: expr '+' expr { $$ = $1 + $3 }
+	| expr '-' expr { $$ = $1 - $3 }
+	| expr '*' expr { $$ = $1 * $3 }
+	| expr '/' expr { $$ = $1 / $3 }
+	| '(' expr ')' { $$ = $2 }
+	| NUMBER { $$ = $1 }
+	;
+
+%%
+
+#runtime "hsp3cl"
+
+	yyparse
+	end stat
+
+*yylex
+	if start == 0 {
+		input expr,, 1
+		if peek( expr ) == 0 : return 0
+		expr_ptr = 0
+		start = 1
+	}
+	char = peek( expr, expr_ptr )
+	if char == 10 || char == 13 {
+		start = 0
+		return 10
+	}
+	if char == ' ' || char == '\t' {
+		expr_ptr ++
+		goto *yylex
+	}
+	if char >= '0' && char <= '9' {
+		yylval = char - '0'
+		expr_ptr ++
+		repeat
+			char = peek( expr, expr_ptr )
+			if char >= '0' && char <= '9' : else : break
+			yylval = yylval * 10 + char - '0'
+			expr_ptr ++
+		loop
+		return NUMBER
+	}
+	expr_ptr ++
+	return char
+
+*yyerror
+	mes yyerrmsg
+	return
