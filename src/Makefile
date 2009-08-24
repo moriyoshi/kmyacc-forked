@@ -1,5 +1,6 @@
 # Makefile for KM-yacc
 
+PREFIX = /usr/local
 bindir = $(PREFIX)/bin
 libdir = $(PREFIX)/lib
 PARLIB = $(libdir)/kmyacc
