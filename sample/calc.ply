@@ -1,0 +1,65 @@
+/*
+ * calculator
+ */
+
+%token NUMBER
+
+%left '+' '-'
+%left '*' '/'
+
+%%
+
+start:	lines;
+
+lines: /* empty */
+	| lines line
+        ;
+
+line	: expr '\n' { print expr,"\n"; }
+	| '\n' { print "(empty line ignored)\n"; }
+	| error '\n'
+	;
+
+result@expr:
+	a@expr '+' b@expr { result = a + b; }
+	| a@expr '-' b@expr { result = a - b; }
+	| a@expr '*' b@expr { result = a * b; }
+	| a@expr '/' b@expr { result = a / b; }
+	| '(' a@expr ')' { result = a; }
+	| NUMBER { result = NUMBER; }
+	;
+
+%%
+
+$lexbuf = '';
+
+sub yylex
+{
+    while (1) {
+	if ($lexbuf =~ /^[\t ]+/) {
+	    $lexbuf = substr($lexbuf, length($1));
+	}
+	last if ($lexbuf ne '');
+	if (!($lexbuf = <STDIN>)) {
+	    return 0;
+	}
+    }
+
+    if ($lexbuf =~ /^(\d+)/) {
+	$yylval = $1 - 0;
+	$lexbuf = substr($lexbuf, length($1));
+	return $NUMBER;
+    } else {
+	my $ret = ord($lexbuf);
+	$lexbuf = substr($lexbuf, 1);
+	return $ret;
+    }
+}
+
+sub yyerror
+{
+    my ($msg) = @_;
+    print "$msg\n";
+}
+
+exit &yyparse();

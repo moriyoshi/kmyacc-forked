@@ -1,0 +1,157 @@
+/* Calculator in kmyacc+JavaScript. */
+
+%{
+<html>
+<head>
+<title>Calculator</title>
+<script type="text/javascript">
+<!--
+%}
+
+
+%token NUMBER IDENTIFIER
+
+%left '+' '-'
+%left '*' '/'
+
+%%
+
+start:	line;
+
+/*
+lines:
+        | lines line { $$ = $1 + $2; }
+        ;
+*/
+
+line	: expr  { setAnswer($1 + "<br>"); }
+	| { $$ = "(empty line ignored)<br>"; }
+	| error { $$ = ""; }
+	;
+
+expr	: expr '+' expr { $$ = $1 + $3; }
+	| expr '-' expr { $$ = $1 - $3; }
+	| expr '*' expr { $$ = $1 * $3; }
+	| expr '/' expr { $$ = $1 / $3; }
+	| '(' expr ')' { $$ = $2; }
+	| NUMBER { $$ = $1; }
+	;
+
+%%
+
+/* Lexical analyzer */
+
+var buffer;
+var token;
+var toktype;
+
+
+function isletter(c)
+{
+  return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
+}
+
+function isdigit(c)
+{
+  return ('0' <= c && c <= '9');
+}
+
+function yylex()
+{
+  while (buffer != ""
+         && (buffer.charAt(0) == ' ' || buffer.charAt(0) == '\t')) {
+    buffer = buffer.substr(1);
+  }
+  if (buffer.length == 0)
+    return 0;
+  if (isletter(buffer.charAt(0))) {
+    var i;
+    for (i = 0; i < buffer.length; i++) {
+      if (!isletter(buffer.charAt(i)) && !isdigit(buffer.charAt(i)))
+        break;
+    }
+    token = buffer.substr(0, i);
+    buffer = buffer.substr(i);
+    return IDENTIFIER;
+  } else if (isdigit(buffer.charAt(0))) {
+    var i;
+    for (i = 0; i < buffer.length; i++) {
+      if (!isdigit(buffer.charAt(i)))
+        break;
+    }
+    token = buffer.substr(0, i);
+    buffer = buffer.substr(i);
+    yylval = token - 0;
+    return NUMBER;
+  } else {
+    token = buffer.substr(0, 1);
+    buffer = buffer.substr(1);
+    return token.charCodeAt(0);
+  }
+}
+
+function yyerror(msg) {
+  yyprintln(msg);
+}
+
+var _bro = (window.opera?
+            4:(window.external?3:(window.controllers?1:(document.layers?2:0))));
+var _ie5 = (navigator.appName.indexOf('Microsoft Internet Explorer')>=0 &&
+            document.getElementById)?1:0;
+
+// C
+// _dom : kind of DOM.
+//        IE4 = 1, IE5+ = 2, NN4 = 3, NN6+ = 4, others = 0
+var _dom =  document.all ? (document.getElementById ? 2 : 1)
+           : document.getElementById ? 4
+           : document.layers ? 3 : 0;
+
+function getDivFromName(nm) {
+  if (_dom==4 || _dom==2)
+    return document.getElementById(nm);
+  if (_dom==1)
+    return document.all(nm);
+  if (_dom==3) {
+    var s = '';
+    for (var i = 1; i < arguments.length; i++)
+      s += 'document.layers.'+arguments[i]+'.';
+    return eval(s+'document.layers.'+nm);
+  }
+  return null;
+}
+
+function writeDivHTML(div,html) { 
+  if (document.layers) {
+    div.document.open();
+    div.document.write(html);
+    div.document.close();
+  }
+  else if (typeof div.innerHTML!="undefined") { 
+    div.innerHTML = html;
+  }
+}
+
+function setAnswer(ans) {
+  writeDivHTML(getDivFromName("answer"), ans);
+}
+
+function main() {
+  buffer = document.compiledtext.one.value;
+  yyparse();
+  return false;
+}
+// -->
+</script>
+</head>
+<body>
+Enter expression to compute:
+<form name="compiledtext" id="compiledtext" onsubmit="return main()">
+<input type="text" name="one" id="one" size=100>
+<input name="answer" type="button" value="ANSWER" onclick="main()">
+</form>
+<hr>
+<div id="answer">
+</div>
+<hr>
+</body>
+</html>

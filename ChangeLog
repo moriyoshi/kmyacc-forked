@@ -1,0 +1,10 @@
+2006-02-16  MORI Koichiro  <kmori@acm.org>
+
+	* src/yacc.c (usage): Version 4.1.4.
+
+2006-02-16  MORI Koichiro  <kmori@acm.org>
+
+	* src/kmyacc.java.parser, src/kmyacc.js.parser,
+	src/kmyacc.pl.parser:
+	Fix the bug of missing YYDEFAULT handling in yyparse function.
+

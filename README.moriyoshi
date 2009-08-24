@@ -1,0 +1,11 @@
+This version of kmyacc contains the patches from the following people:
+
+- Yu Kobayashi, Mineaki Sakatoku: Python and ActionScript support [1][2]
+- Masato Bito: PHP support [3]
+- Kurusugawa Densan Blog: C# support [4]
+- Moriyoshi Koizumi: flexible handling of '$' notations.
+
+[1] http://d.hatena.ne.jp/yukoba/20080123/p1  
+[2] http://d.hatena.ne.jp/yukoba/20080220/p1  
+[3] http://blog.bz2.jp/archives/2008/01/phpyacc.html 
+[4] http://kurusugawa.jp/2008/02/17/kmyacc%E3%81%AEc%E5%AF%BE%E5%BF%9C/ 

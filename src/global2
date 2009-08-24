@@ -1,0 +1,16 @@
+
+# global2 - sed script which extracts global variables & functions
+
+/^;global/ {
+	s/^;global/extern/
+	s|[^/;]$|&;|
+	s/()[ 	]*;/(void);/
+	p
+}
+
+/^global/ {
+	s/^global/extern/
+	s|[^/;]$|&;|
+	s/()[ 	]*;/(void);/
+	p
+}

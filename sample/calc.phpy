@@ -1,0 +1,60 @@
+/*
+ * calculator
+ */
+
+%token NUMBER
+
+%left '+' '-'
+%left '*' '/'
+
+%%
+
+start:	lines;
+
+lines: /* empty */
+	| lines line
+        ;
+
+line	: expr '\n' { echo $1."\n"; }
+	| '\n' { echo "(empty line ignored)\n"; }
+	| error '\n'
+	;
+
+expr	: expr '+' expr { $$ = $1 + $3; }
+	| expr '-' expr { $$ = $1 - $3; }
+	| expr '*' expr { $$ = $1 * $3; }
+	| expr '/' expr { $$ = $1 / $3; }
+	| '(' expr ')' { $$ = $2; }
+	| NUMBER { $$ = $1; }
+	;
+
+%%
+
+$lexbuf = '';
+
+function yylex()
+{
+    global $lexbuf, $yylval;
+    do {
+        $lexbuf = preg_replace('/^[\t ]+/', '', $lexbuf);
+        if ($lexbuf) break;
+    } while ($lexbuf = fgets(STDIN));
+    $lexbuf = str_replace(PHP_EOL, "\n", $lexbuf);
+
+    if (preg_match('/^(\d+)/', $lexbuf, $matches)) {
+        $yylval = (int)$matches[1];
+        $lexbuf = substr($lexbuf, strlen($matches[1]));
+        return NUMBER;
+    } else {
+        $ret = ord($lexbuf);
+        $lexbuf = substr($lexbuf, 1);
+        return $ret;
+    }
+}
+
+function yyerror($msg)
+{
+	print($msg);
+}
+
+yyparse();

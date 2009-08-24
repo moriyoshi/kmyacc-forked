@@ -1,0 +1,8 @@
+#!/bin/sh
+
+CC=cc
+
+sed -e '/^# DO NOT DELETE/,$d' Makefile >Makefile.tmp
+echo '# DO NOT DELETE THIS LINE -- make depend depends on it.' >>Makefile.tmp
+$CC -MM $@ >>Makefile.tmp
+mv -f Makefile Makefile.bak && mv -f Makefile.tmp Makefile

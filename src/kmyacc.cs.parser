@@ -1,0 +1,515 @@
+/* -*-C#-*-  Prototype file of KM-yacc parser for C#.
+ *
+ * Written by seraph
+ *
+ * This file is PUBLIC DOMAIN.
+ */
+
+$semval($) yyval
+$semval($,%t) yyval
+$semval(%n) yyastk[yysp-(%l-%n)]
+$semval(%n,%t) ((%t)yyastk[yysp-(%l-%n)])
+
+/* Here goes %{ ... %} */
+$include;
+
+$if -t
+using System.IO;
+$endif
+
+public class $(CLASSNAME) {
+
+
+$tokenval
+  public const int %s = %n;
+$endtokenval
+
+  
+  /*
+    #define yyclearin (yychar = -1)
+    #define yyerrok (yyerrflag = 0)
+    #define YYRECOVERING (yyerrflag != 0)
+    #define YYERROR  goto yyerrlab
+  */
+
+
+  /** Debug mode flag **/
+  static bool yydebug = false;
+
+  /** lexical element object **/
+  private Object yylval;
+
+  /** Semantic value */
+  private Object yyval;
+
+  /** Semantic stack **/
+  private Object[] yyastk;
+
+  /** Syntax stack **/
+  private short[] yysstk;
+
+  /** Stack pointer **/
+  private int yysp;
+
+  /** Error handling state **/
+  private int yyerrflag;
+
+  /** lookahead token **/
+  private int yychar;
+
+  /* code after %% in *.y */
+  $tailcode;
+
+$if -t
+  /* Dump Parse Tree Flag */
+  static bool yyDumpParseTree = false;
+
+  /* Dense Tree */
+  static bool yydense = false;
+
+  /** Parse Tree **/
+  public static abstract class YYParseTree {
+    public void prettyPrint(TextWriter out) {
+      prettyPrintX(out, "", true);
+    }
+
+    abstract void prettyPrintX(TextWriter out, String head, boolean last);
+  }
+
+  /** YYNode represents nonterminal symbol. **/
+  public static class YYNode : YYParseTree {
+    int id;
+    int nkids;
+    YYParseTree[] kids;
+
+
+    YYNode(int id, YYParseTree[] stack, int from, int len) {
+      this.id = id;
+      nkids = len;
+      kids = new YYParseTree[len];
+      for (int i = 0; i < len; i++)
+        kids[i] = stack[from + i];
+    }
+
+
+    void appendKids(YYParseTree[] stack, int from, int len) {
+      if (nkids + len > kids.Length) {
+        int size = kids.Length * 2;
+	if (size < nkids + len) size = nkids + len;
+        YYParseTree[] a = new YYParseTree[size];
+        for (int i = 0; i < nkids; i++)
+          a[i] = kids[i];
+        kids = a;
+      }
+      for (int i = 0; i < len; i++)
+        kids[nkids + i] = stack[from + i];
+      nkids += len;
+    }
+
+
+    void prettyPrintX(TextWriter out, String head, boolean last) {
+      String head2 = head;
+      if (head != "") {
+        if (last)
+          head2 = head + " +-"; /* L */
+        else
+          head2 = head + " +-"; /* T-rotated-left */
+      }
+      out.println(head2 + yynonterms[id]);
+      head += last ? "   " : " | ";
+
+      for (int i = 0; i < nkids; i++) {
+        if (!yydense)
+          out.WriteLine(head + " | ");
+        if (i + 1 != nkids)
+          kids[i].prettyPrintX(out, head, false);
+        else
+          kids[i].prettyPrintX(out, head, true);
+      }
+    }
+
+    public String toString() {
+      StringBuilder buf = new StringBuilder();
+      buf.Append("(");
+      buf.Append(yynonterms[id]);
+      for (int i = 0; i < nkids; i++) {
+        buf.Append(" ");
+        buf.Append(kids[i].toString());
+      }
+      buf.Append(")");
+      return buf.ToString();
+    }
+  }
+
+  /** YYLeaf represents terminal symbol. **/
+  public static class YYLeaf : YYParseTree {
+    int id;
+    Object value;
+
+    public YYLeaf(int id, Object value) {
+      this.id = id;
+      this.value = value;
+    }
+
+    void prettyPrintX(TextWriter out, String head, boolean last) {
+      String head2 = head;
+      if (head != "") {
+        if (last)
+          head2 = head + " +-"; /* L */
+        else
+          head2 = head + " +-"; /* T-rotated-left */
+      }
+      out.WriteLine(head2 + toString());
+    }
+
+    public override String ToString() {
+      if (value != null)
+        return yyterminals[id] + "[" + value.ToString() + "]";
+      else
+        return yyterminals[id];
+    }
+  }
+
+  /* Parse Tree Stack */
+  private YYParseTree[] yyPTStack;
+
+
+  private static readonly String[] yyterminals = new string[] {
+    $listvar terminals
+    , "???"
+  };
+
+  private static readonly String[] yynonterms = new string[] {
+    $listvar nonterminals
+  };
+
+  private String yytokname(int n) {
+    switch (n) {
+    $switch-for-token-name;
+    default:
+        return "???";
+    }
+  }
+
+  private static readonly String[] yyproduction = new string[] {
+    $production-strings;
+  };
+
+  /* Traditional Debug Mode */
+  private void YYTRACE_NEWSTATE(int state, int sym) {
+    if (yydebug)
+      Console.Error.WriteLine("% State " + state + ", Lookahead "
+                         + (sym < 0 ? "--none--" : yyterminals[sym]));
+  }
+
+  private void YYTRACE_READ(int sym) {
+    if (yydebug)
+      Console.Error.WriteLine("% Reading " + yyterminals[sym]);
+  }
+
+  private void YYTRACE_SHIFT(int sym) {
+    if (yydebug)
+      Console.Error.WriteLine("% Shift " + yyterminals[sym]);
+  }
+
+  private void YYTRACE_ACCEPT() {
+    if (yydebug) Console.Error.WriteLine("% Accepted.");
+  }
+
+  private void YYTRACE_REDUCE(int n) {
+    if (yydebug)
+      System.err.println("% Reduce by (" + n + ") " + yyproduction[n]);
+  }
+
+  private void YYTRACE_POP(int state) {
+    if (yydebug)
+	Console.Error.WriteLine("% Recovering, uncovers state " + state);
+  }
+
+  private void YYTRACE_DISCARD(int sym) {
+    if (yydebug)
+      Console.Error.WriteLine("% Discard " + yyterminals[sym]);
+  }
+$endif
+
+
+  private static readonly $TYPEOF(yytranslate)[] yytranslate = new $TYPEOF(yytranslate)[] {
+  $listvar yytranslate
+  };
+  private const int YYBADCH = $(YYBADCH);
+  private const int YYMAXLEX = $(YYMAXLEX);
+  private const int YYTERMS = $(YYTERMS);
+  private const int YYNONTERMS = $(YYNONTERMS);
+
+  private static readonly short[] yyaction = new short[] {
+  $listvar yyaction
+  };
+  private const int YYLAST = $(YYLAST);
+
+  private static readonly $TYPEOF(yycheck)[] yycheck = new $TYPEOF(yycheck)[] {
+  $listvar yycheck
+  };
+
+  private static readonly short[] yybase = new short[] {
+  $listvar yybase
+  };
+  private const int YY2TBLSTATE = $(YY2TBLSTATE);
+
+  private static readonly short[] yydefault = new short[] {
+  $listvar yydefault
+  };
+
+  private static readonly short[] yygoto = new short[] {
+  $listvar yygoto
+  };
+  private const int YYGLAST = $(YYGLAST);
+
+  private static readonly $TYPEOF(yygcheck)[] yygcheck = new $TYPEOF(yygcheck)[] {
+  $listvar yygcheck
+  };
+
+  private static readonly short[] yygbase = new short[] {
+  $listvar yygbase
+  };
+
+  private static readonly short[] yygdefault = new short[] {
+  $listvar yygdefault
+  };
+
+  private static readonly $TYPEOF(yylhs)[] yylhs = new $TYPEOF(yylhs)[] {
+  $listvar yylhs
+  };
+
+  private static readonly $TYPEOF(yylen)[] yylen = new $TYPEOF(yylen)[] {
+  $listvar yylen
+  };
+  private const int YYSTATES = $(YYSTATES);
+  private const int YYNLSTATES = $(YYNLSTATES);
+  private const int YYINTERRTOK = $(YYINTERRTOK);
+  private const int YYUNEXPECTED = $(YYUNEXPECTED);
+  private const int YYDEFAULT = $(YYDEFAULT);
+$if -a
+
+$reduce
+  private void yyact%n()
+  {%b}
+$endreduce
+$endif
+
+  private const int YYDEFAULTSTACK = 512;
+
+  /* Grow syntax and sematic stacks */
+  private void growStack() {
+    short[] tmpsstk = new short[yysp * 2];
+    Object[] tmpastk = new Object[yysp * 2];
+    for (int i = 0; i < yysp; i++) {
+      tmpsstk[i] = yysstk[i];
+      tmpastk[i] = yyastk[i];
+    }
+    yysstk = tmpsstk;
+    yyastk = tmpastk;
+  }
+
+  /*
+   * Parser entry point
+   */
+  public int yyparse() {
+    int yyn;
+    int yyp;
+    int yyl;
+
+    yyastk = new Object[YYDEFAULTSTACK];
+    yysstk = new short[YYDEFAULTSTACK];
+$if -t
+    if (yyDumpParseTree)
+      yyPTStack = new YYParseTree[YYDEFAULTSTACK];
+$endif
+
+    int yystate = 0;
+    int yychar1 = yychar = -1;
+
+    yysp = 0;
+    yysstk[yysp] = 0;
+    yyerrflag = 0;
+    for (;;) {
+$if -t
+      YYTRACE_NEWSTATE(yystate, yychar1);
+$endif
+      if (yybase[yystate] == 0)
+        yyn = yydefault[yystate];
+      else {
+        if (yychar < 0) {
+          if ((yychar = yylex()) <= 0) yychar = 0;
+          yychar1 = yychar < YYMAXLEX ? yytranslate[yychar] : YYBADCH;
+$if -t
+          YYTRACE_READ(yychar1);
+$endif
+        }
+
+        if (((yyn = yybase[yystate] + yychar1) >= 0
+             && yyn < YYLAST && yycheck[yyn] == yychar1
+             || (yystate < YY2TBLSTATE
+                 && (yyn = yybase[yystate + YYNLSTATES] + yychar1) >= 0
+                 && yyn < YYLAST && yycheck[yyn] == yychar1))
+            && (yyn = yyaction[yyn]) != YYDEFAULT) {
+          /*
+           * >= YYNLSTATE: shift and reduce
+           * > 0: shift
+           * = 0: accept
+           * < 0: reduce
+           * = -YYUNEXPECTED: error
+           */
+          if (yyn > 0) {
+            /* shift */
+$if -t
+            YYTRACE_SHIFT(yychar1);
+$endif
+            if (++yysp >= yysstk.Length)
+              growStack();
+
+            yysstk[yysp] = (short)(yystate = yyn);
+            yyastk[yysp] = yylval;
+$if -t
+            if (yyDumpParseTree)
+	      yyPTStack[yysp] = new YYLeaf(yychar1, yylval);
+$endif            
+            yychar1 = yychar = -1;
+
+            if (yyerrflag > 0)
+              yyerrflag--;
+            if (yyn < YYNLSTATES)
+              continue;
+            
+            /* yyn >= YYNLSTATES means shift-and-reduce */
+            yyn -= YYNLSTATES;
+          } else
+            yyn = -yyn;
+        } else
+          yyn = yydefault[yystate];
+      }
+      
+      for (;;) {
+        /* reduce/error */
+        if (yyn == 0) {
+          /* accept */
+$if -t
+          YYTRACE_ACCEPT();
+	  if (yyDumpParseTree) {
+	    TextWriter writer = Console.Out;
+	    yyPTStack[yysp].prettyPrint(writer);
+            writer.flush();
+	  }
+$endif
+          return 0;
+        }
+
+	bool yyparseerror = true;
+	if (yyn != YYUNEXPECTED) {
+          /* reduce */
+	  yyparseerror = false;
+          yyl = yylen[yyn];
+          yyval = yyastk[yysp-yyl+1];
+$if -t
+          YYTRACE_REDUCE(yyn);
+$endif
+	  int yylrec = 0;
+          /* Following line will be replaced by reduce actions */
+$if -a
+          switch(yyn) {
+$reduce
+          case %n: yyact%n(); break;
+$endreduce
+          }
+$endif
+$ifnot -a
+          switch(yyn) {
+$reduce
+          case %n:
+{%b} break;
+$endreduce
+          }
+$endif
+	  if (!yyparseerror) {
+$if -t
+	    if (yyDumpParseTree) {
+	      if (yylrec != 0)
+	        ((YYNode)yyPTStack[yysp-yyl+1]).appendKids(yyPTStack, yysp-yyl+2, yyl-1);
+	      else
+	        yyPTStack[yysp-yyl+1] = new YYNode(yylhs[yyn], yyPTStack, yysp-yyl+1, yyl);
+	    }
+$endif
+            /* Goto - shift nonterminal */
+            yysp -= yyl;
+            yyn = yylhs[yyn];
+            if ((yyp = yygbase[yyn] + yysstk[yysp]) >= 0 && yyp < YYGLAST
+                && yygcheck[yyp] == yyn)
+              yystate = yygoto[yyp];
+            else
+              yystate = yygdefault[yyn];
+          
+            if (++yysp >= yysstk.Length)
+              growStack();
+
+            yysstk[yysp] = (short)yystate;
+            yyastk[yysp] = yyval;
+	  }
+	}
+
+	if (yyparseerror) {
+          /* error */
+          switch (yyerrflag) {
+          case 0:
+            yyerror("syntax error");
+            goto case 1;
+          case 1:
+          case 2:
+            yyerrflag = 3;
+            /* Pop until error-expecting state uncovered */
+
+            while (!((yyn = yybase[yystate] + YYINTERRTOK) >= 0
+                     && yyn < YYLAST && yycheck[yyn] == YYINTERRTOK
+                     || (yystate < YY2TBLSTATE
+                         && (yyn = yybase[yystate + YYNLSTATES] + YYINTERRTOK) >= 0
+                         && yyn < YYLAST && yycheck[yyn] == YYINTERRTOK))) {
+              if (yysp <= 0)
+                return 1;
+              yystate = yysstk[--yysp];
+$if -t
+              YYTRACE_POP(yystate);
+$endif
+            }
+            yyn = yyaction[yyn];
+$if -t
+            YYTRACE_SHIFT(YYINTERRTOK);
+$endif
+            yysstk[++yysp] = (short)(yystate = yyn);
+$if -t
+            if (yyDumpParseTree)
+	      yyPTStack[yysp] = new YYLeaf(YYINTERRTOK, null);
+$endif            
+            break;
+
+          case 3:
+$if -t
+            YYTRACE_DISCARD(yychar1);
+$endif
+            if (yychar1 == 0)
+              return 1;
+	    yychar1 = yychar = -1;
+            break;
+          }
+        }
+        
+        if (yystate < YYNLSTATES)
+          break;
+        /* >= YYNLSTATES means shift-and-reduce */
+        yyn = yystate - YYNLSTATES;
+      }
+    }
+  }
+
+}
+
+
+
+

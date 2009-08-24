@@ -1,0 +1,102 @@
+/*
+ * Integer calculator
+ */
+
+%{
+/* Place namespace & using here */
+using System;
+using System.Collections.Generic;
+using System.Text;
+%}
+
+
+%token NUMBER
+
+%type <int> expr NUMBER
+
+%left '+' '-'
+%left '*' '/'
+
+%%
+
+start:	lines;
+
+lines: /* empty */
+	| lines line { yylrec++; }
+        ;
+
+line	: expr '\n' { Console.Out.WriteLine($1); }
+	| '\n' { Console.Out.WriteLine("(empty line ignored)"); }
+	| error '\n'
+	;
+
+expr	: expr '+' expr { $$ = $1 + $3; }
+	| expr '-' expr { $$ = $1 - $3; }
+	| expr '*' expr { $$ = $1 * $3; }
+	| expr '/' expr { $$ = $1 / $3; }
+	| '(' expr ')' { $$ = $2; }
+	| NUMBER { $$ = $1; }
+	;
+
+%%
+
+/* Lexical analyzer */
+
+private int ch = 0;
+
+private int getch() {
+  int c = ch;
+  if (c != 0) {
+    ch = 0;
+    return c;
+  }
+  try {
+    return Console.Read();
+  } catch (System.IO.IOException e) {
+    throw new Exception(e.Message);
+  }
+}
+
+private void ungetch(int c) { ch = c; }
+
+int yylex() {
+  yylval = null;
+  for (;;) {
+    int c = getch();
+    if (c < 0)
+      return 0;
+    else if (c == ' ' || c == '\t')
+      continue;
+    else if (char.IsDigit((char)c)) {
+      int n = 0;
+      char[] buf = new char[100];
+      while (char.IsDigit((char)c)) {
+        buf[n++] = (char)c;
+        c = getch();
+      }
+      ungetch(c);
+      yylval = int.Parse(new String(buf, 0, n));
+      return NUMBER;
+    }
+    else
+      // CR(\r)は読み飛ばす。
+      // とりあえずwindowsではこれで動くんじゃないかな？ 
+      // Linux/Unixでは\rこないだろうから動く　Macでは多分動かない。
+      // まぁ、monoがどんな実装にしてるのか知らないけど。
+      if(c == '\r') c = getch();
+      return c;
+  }
+}
+
+
+void yyerror(String msg) {
+  Console.Error.WriteLine(msg);
+}
+
+public static void Main(String[] args) {
+  yydebug = true;
+  //  yyDumpParseTree = true;
+
+  Calc it = new Calc();
+  it.yyparse();
+}

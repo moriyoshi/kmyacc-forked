@@ -1,0 +1,8 @@
+
+# global1 - sed script which extracts global type/macro definitions
+
+/^#ifndef[ 	]*global/,/^#endif[ 	]*\/\* global \*\// {
+	/^#ifndef[ 	]*global/d
+	/^#endif[ 	]*\/\* global \*\//d
+	p
+}

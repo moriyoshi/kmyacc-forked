@@ -1,0 +1,514 @@
+/* -*-as3-*-  Prototype file of KM-yacc parser for ActionScript 3.
+ *
+ * Written by MORI Koichiro
+ * Translated from Java to ActionScript 3 by Yu Kobayashi
+ *
+ * This file is PUBLIC DOMAIN.
+ */
+
+$semval($) yyval
+$semval($,%t) yyval
+$semval(%n) yyastk[yysp-(%l-%n)]
+$semval(%n,%t) ((%t)yyastk[yysp-(%l-%n)])
+
+/* Here goes %{ ... %} */
+$include;
+
+$if -t
+$endif
+
+class $(CLASSNAME)Parser {
+
+
+$tokenval
+  public const %s:int = %n;
+$endtokenval
+
+  
+  /*
+    #define yyclearin (yychar = -1)
+    #define yyerrok (yyerrflag = 0)
+    #define YYRECOVERING (yyerrflag != 0)
+    #define YYERROR  goto yyerrlab
+  */
+
+
+  /** Debug mode flag **/
+  public static var yydebug:Boolean = false;
+
+  /** lexical element object **/
+  private var yylval:Object;
+
+  /** Semantic value */
+  private var yyval:Object;
+
+  /** Semantic stack **/
+  private var yyastk:Array;
+
+  /** Syntax stack **/
+  private var yysstk:Array;
+
+  /** Stack pointer **/
+  private var yysp:int;
+
+  /** Error handling state **/
+  private var yyerrflag:int;
+
+  /** lookahead token **/
+  private var yychar:int;
+
+  /* code after %% in *.y */
+  $tailcode;
+
+  /* Dump Parse Tree Flag */
+  public static var yyDumpParseTree:Boolean = false;
+
+$if -t
+
+  /* Dense Tree */
+  public static var yydense:Boolean = false;
+
+
+  /* Parse Tree Stack */
+  private var yyPTStack:Array;
+
+
+  public static const yyterminals:Array = [
+    $listvar terminals
+    , "???"
+  ];
+
+  public static const yynonterms:Array = [
+    $listvar nonterminals
+  ];
+
+  private function yytokname(n:int):String {
+    switch (n) {
+    $switch-for-token-name;
+    default:
+        return "???";
+    }
+  }
+
+  private const yyproduction:Array = [
+    $production-strings;
+  ];
+
+  /* Traditional Debug Mode */
+  private function YYTRACE_NEWSTATE(state:int, sym:int):void {
+    if (yydebug)
+      trace("% State " + state + ", Lookahead "
+                         + (sym < 0 ? "--none--" : yyterminals[sym]));
+  }
+
+  private function YYTRACE_READ(sym:int):void {
+    if (yydebug)
+      trace("% Reading " + yyterminals[sym]);
+  }
+
+  private function YYTRACE_SHIFT(sym:int):void {
+    if (yydebug)
+      trace("% Shift " + yyterminals[sym]);
+  }
+
+  private function YYTRACE_ACCEPT():void {
+    if (yydebug) trace("% Accepted.");
+  }
+
+  private function YYTRACE_REDUCE(n:int):void {
+    if (yydebug)
+      trace("% Reduce by (" + n + ") " + yyproduction[n]);
+  }
+
+  private function YYTRACE_POP(state:int):void {
+    if (yydebug)
+	trace("% Recovering, uncovers state " + state);
+  }
+
+  private function YYTRACE_DISCARD(sym:int):void {
+    if (yydebug)
+      trace("% Discard " + yyterminals[sym]);
+  }
+$endif
+
+
+  private const yytranslate:Array = [
+  $listvar yytranslate
+  ];
+  private const YYBADCH:int = $(YYBADCH);
+  private const YYMAXLEX:int = $(YYMAXLEX);
+  private const YYTERMS:int = $(YYTERMS);
+  private const YYNONTERMS:int = $(YYNONTERMS);
+
+  private const yyaction:Array = [
+  $listvar yyaction
+  ];
+  private const YYLAST:int = $(YYLAST);
+
+  private const yycheck:Array = [
+  $listvar yycheck
+  ];
+
+  private const yybase:Array = [
+  $listvar yybase
+  ];
+  private const YY2TBLSTATE:int = $(YY2TBLSTATE);
+
+  private const yydefault:Array = [
+  $listvar yydefault
+  ];
+
+  private const yygoto:Array = [
+  $listvar yygoto
+  ];
+  private const YYGLAST:int = $(YYGLAST);
+
+  private const yygcheck:Array = [
+  $listvar yygcheck
+  ];
+
+  private const yygbase:Array = [
+  $listvar yygbase
+  ];
+
+  private const yygdefault:Array = [
+  $listvar yygdefault
+  ];
+
+  private const yylhs:Array = [
+  $listvar yylhs
+  ];
+
+  private const yylen:Array = [
+  $listvar yylen
+  ];
+  private const YYSTATES:int = $(YYSTATES);
+  private const YYNLSTATES:int = $(YYNLSTATES);
+  private const YYINTERRTOK:int = $(YYINTERRTOK);
+  private const YYUNEXPECTED:int = $(YYUNEXPECTED);
+  private const YYDEFAULT:int = $(YYDEFAULT);
+$if -a
+
+$reduce
+  private function yyact%n():void
+  {%b}
+$endreduce
+$endif
+
+  private const YYDEFAULTSTACK:int = 512;
+
+  /* Grow syntax and sematic stacks */
+  private function growStack():void {
+    var tmpsstk:Array = new Array(yysp * 2);
+    var tmpastk:Array = new Array(yysp * 2);
+    for (var i:int = 0; i < yysp; i++) {
+      tmpsstk[i] = yysstk[i];
+      tmpastk[i] = yyastk[i];
+    }
+    yysstk = tmpsstk;
+    yyastk = tmpastk;
+  }
+
+  /*
+   * Parser entry point
+   */
+  public function yyparse():int {
+    var yyn:int;
+    var yyp:int;
+    var yyl:int;
+
+    yyastk = new Array(YYDEFAULTSTACK);
+    yysstk = new Array(YYDEFAULTSTACK);
+$if -t
+    if (yyDumpParseTree)
+      yyPTStack = new Array(YYDEFAULTSTACK);
+$endif
+
+    var yystate:int = 0;
+    var yychar1:int = yychar = -1;
+
+    yysp = 0;
+    yysstk[yysp] = 0;
+    yyerrflag = 0;
+    for (;;) {
+$if -t
+      YYTRACE_NEWSTATE(yystate, yychar1);
+$endif
+      if (yybase[yystate] == 0)
+        yyn = yydefault[yystate];
+      else {
+        if (yychar < 0) {
+          if ((yychar = yylex()) <= 0) yychar = 0;
+          yychar1 = yychar < YYMAXLEX ? yytranslate[yychar] : YYBADCH;
+$if -t
+          YYTRACE_READ(yychar1);
+$endif
+        }
+
+        if (((yyn = yybase[yystate] + yychar1) >= 0
+             && yyn < YYLAST && yycheck[yyn] == yychar1
+             || (yystate < YY2TBLSTATE
+                 && (yyn = yybase[yystate + YYNLSTATES] + yychar1) >= 0
+                 && yyn < YYLAST && yycheck[yyn] == yychar1))
+            && (yyn = yyaction[yyn]) != YYDEFAULT) {
+          /*
+           * >= YYNLSTATE: shift and reduce
+           * > 0: shift
+           * = 0: accept
+           * < 0: reduce
+           * = -YYUNEXPECTED: error
+           */
+          if (yyn > 0) {
+            /* shift */
+$if -t
+            YYTRACE_SHIFT(yychar1);
+$endif
+            if (++yysp >= yysstk.length)
+              growStack();
+
+            yysstk[yysp] = (int)(yystate = yyn);
+            yyastk[yysp] = yylval;
+$if -t
+            if (yyDumpParseTree)
+	      yyPTStack[yysp] = new YYLeaf(yychar1, yylval);
+$endif            
+            yychar1 = yychar = -1;
+
+            if (yyerrflag > 0)
+              yyerrflag--;
+            if (yyn < YYNLSTATES)
+              continue;
+            
+            /* yyn >= YYNLSTATES means shift-and-reduce */
+            yyn -= YYNLSTATES;
+          } else
+            yyn = -yyn;
+        } else
+          yyn = yydefault[yystate];
+      }
+      
+      for (;;) {
+        /* reduce/error */
+        if (yyn == 0) {
+          /* accept */
+$if -t
+          YYTRACE_ACCEPT();
+	  if (yyDumpParseTree) {
+	    yyPTStack[yysp].prettyPrint();
+	  }
+$endif
+          return 0;
+        }
+
+	var yyparseerror:Boolean = true;
+	if (yyn != YYUNEXPECTED) {
+          /* reduce */
+	  yyparseerror = false;
+          yyl = yylen[yyn];
+          yyval = yyastk[yysp-yyl+1];
+$if -t
+          YYTRACE_REDUCE(yyn);
+$endif
+	  var yylrec:int = 0;
+          /* Following line will be replaced by reduce actions */
+$if -a
+          switch(yyn) {
+$reduce
+          case %n: yyact%n(); break;
+$endreduce
+          }
+$endif
+$ifnot -a
+          switch(yyn) {
+$reduce
+          case %n:
+{%b} break;
+$endreduce
+          }
+$endif
+	  if (!yyparseerror) {
+$if -t
+	    if (yyDumpParseTree) {
+	      if (yylrec != 0)
+	        (yyPTStack[yysp-yyl+1]).appendKids(yyPTStack, yysp-yyl+2, yyl-1);
+	      else
+	        yyPTStack[yysp-yyl+1] = new YYNode(yylhs[yyn], yyPTStack, yysp-yyl+1, yyl);
+	    }
+$endif
+            /* Goto - shift nonterminal */
+            yysp -= yyl;
+            yyn = yylhs[yyn];
+            if ((yyp = yygbase[yyn] + yysstk[yysp]) >= 0 && yyp < YYGLAST
+                && yygcheck[yyp] == yyn)
+              yystate = yygoto[yyp];
+            else
+              yystate = yygdefault[yyn];
+          
+            if (++yysp >= yysstk.length)
+              growStack();
+
+            yysstk[yysp] = yystate;
+            yyastk[yysp] = yyval;
+	  }
+	}
+
+	if (yyparseerror) {
+          /* error */
+          switch (yyerrflag) {
+          case 0:
+            yyerror("syntax error");
+          case 1:
+          case 2:
+            yyerrflag = 3;
+            /* Pop until error-expecting state uncovered */
+
+            while (!((yyn = yybase[yystate] + YYINTERRTOK) >= 0
+                     && yyn < YYLAST && yycheck[yyn] == YYINTERRTOK
+                     || (yystate < YY2TBLSTATE
+                         && (yyn = yybase[yystate + YYNLSTATES] + YYINTERRTOK) >= 0
+                         && yyn < YYLAST && yycheck[yyn] == YYINTERRTOK))) {
+              if (yysp <= 0)
+                return 1;
+              yystate = yysstk[--yysp];
+$if -t
+              YYTRACE_POP(yystate);
+$endif
+            }
+            yyn = yyaction[yyn];
+$if -t
+            YYTRACE_SHIFT(YYINTERRTOK);
+$endif
+            yysstk[++yysp] = (int)(yystate = yyn);
+$if -t
+            if (yyDumpParseTree)
+	      yyPTStack[yysp] = new YYLeaf(YYINTERRTOK, null);
+$endif            
+            break;
+
+          case 3:
+$if -t
+            YYTRACE_DISCARD(yychar1);
+$endif
+            if (yychar1 == 0)
+              return 1;
+	    yychar1 = yychar = -1;
+            break;
+          }
+        }
+        
+        if (yystate < YYNLSTATES)
+          break;
+        /* >= YYNLSTATES means shift-and-reduce */
+        yyn = yystate - YYNLSTATES;
+      }
+    }
+    return 0;
+  }
+
+}
+
+$if -t
+  /** Parse Tree **/
+  class YYParseTree {
+    public function prettyPrint():void {
+      prettyPrintX("", true);
+    }
+
+    public function prettyPrintX(head:String, last:Boolean):void {}
+  }
+  
+  /** YYNode represents nonterminal symbol. **/
+  class YYNode extends YYParseTree {
+    private var id:int;
+    private var nkids:int;
+    private var kids:Array;
+
+    public function YYNode(id:int, stack:Array, from:int, len:int) {
+      this.id = id;
+      nkids = len;
+      kids = new Array(len);
+      for (var i:int = 0; i < len; i++)
+        kids[i] = stack[from + i];
+    }
+
+
+    public function appendKids(stack:Array, from:int, len:int):void {
+      if (nkids + len > kids.length) {
+        var size:int = kids.length * 2;
+	if (size < nkids + len) size = nkids + len;
+        var a:Array = new Array(size);
+        for (var i:int = 0; i < nkids; i++)
+          a[i] = kids[i];
+        kids = a;
+      }
+      for (var j:int = 0; j < len; j++)
+        kids[nkids + j] = stack[from + j];
+      nkids += len;
+    }
+
+
+    public override function prettyPrintX(head:String, last:Boolean):void {
+      var head2:String = head;
+      if (head != "") {
+        if (last)
+          head2 = head + " +-"; /* L */
+        else
+          head2 = head + " +-"; /* T-rotated-left */
+      }
+      trace(head2 + $(CLASSNAME)Parser.yynonterms[id]);
+      head += last ? "   " : " | ";
+
+      for (var i:int = 0; i < nkids; i++) {
+        if (!$(CLASSNAME)Parser.yydense)
+          trace(head + " | ");
+        if (i + 1 != nkids)
+          kids[i].prettyPrintX(head, false);
+        else
+          kids[i].prettyPrintX(head, true);
+      }
+    }
+
+    public function toString():String {
+      var buf:String = "";
+      buf += "(";
+      buf += $(CLASSNAME)Parser.yynonterms[id];
+      for (var i:int = 0; i < nkids; i++) {
+        buf += " ";
+        buf += kids[i].toString();
+      }
+      buf + ")";
+      return buf;
+    }
+  }
+
+  /** YYLeaf represents terminal symbol. **/
+  class YYLeaf extends YYParseTree {
+    private var id:int;
+    private var value:Object;
+
+    public function YYLeaf(id:int, value:Object) {
+      this.id = id;
+      this.value = value;
+    }
+
+    public override function prettyPrintX(head:String, last:Boolean):void {
+      var head2:String = head;
+      if (head != "") {
+        if (last)
+          head2 = head + " +-"; /* L */
+        else
+          head2 = head + " +-"; /* T-rotated-left */
+      }
+      trace(head2 + toString());
+    }
+
+    public function toString():String {
+      if (value != null)
+        return $(CLASSNAME)Parser.yyterminals[id] + "[" + value.toString() + "]";
+      else
+        return $(CLASSNAME)Parser.yyterminals[id];
+    }
+  }
+$endif
+
+

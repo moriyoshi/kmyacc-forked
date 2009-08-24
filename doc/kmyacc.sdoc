@@ -1,0 +1,633 @@
+<?xml version='1.0' encoding="EUC-JP"?>
+
+<doc xml:lang="ja">
+<head>
+<title>KMyacc ユーザーズガイド</title>
+</head>
+
+<body>
+kmyaccはyaccやbisonと同じLALRパーサージェネレータです。
+yaccと互換性があり、生成される表が小さく、ホスト言語としてC以外にJava,
+JavaScript,Perlも使うことができます。
+
+なおこの文書の内容は、予告なく変更される可能性があることを
+あらかじめ御了承ください。
+
+<section title="プログラムの入手とインストール">
+最新のソースコード(ベータ版)は<a href="kmyacc-4.1.4.tar.gz">kmyacc-4.1.4.tar.gz</a> 
+です。ソースのみでバイナリは含まれていません。
+
+コンパイルするには、ANSI Cコンパイラ(gccで十分)が必要です。
+
+以下のコマンド
+<program>
+ gzip -d kmyacc-4.1.4.tar.gz | tar xvf -
+</program>
+
+でアーカイブを展開すると kmyacc-4.1.4というディレクトリができるので、
+この中に移動します。
+
+この中の Makefile 中の
+<program>
+BIN = /usr/local/bin
+PARLIB = /usr/local/lib
+</program>
+を適切なインストール先に変更してください。BINはkmyaccバイナリが置かれる場所、
+PARLIBはパーサーのプロトタイプファイルが置かれる場所です。
+
+そして、
+<program>
+make
+make install
+</program>
+でコンパイル・インストールが完了します。
+
+</section>
+
+<section title="使用方法">
+kmyaccの起動の書式は以下の通りです。
+<pre class="def">
+  kmyacc [ -dvltani ] [ -b <i>X</i> ] [ -p <i>XX</i> ] [ -m <i>MODEL</i> ] [ -L <i>LANG</i> ] <i>grammarfile</i>
+</pre>
+
+<i>grammerfile</i>にはyaccソースを指定します。
+kmyaccはこのファイルの拡張子から、以下のルールに従ってホスト言語を推定します。
+
+<table title="拡張子と言語の対応">
+<colgroup>
+<col align="center"/>
+<col align="center"/>
+<col align="center"/>
+</colgroup>
+<thead>
+<tr>
+  <th>yacc拡張子</th>
+  <th>ホスト言語</th>
+  <th>出力ファイル拡張子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>.y</td> <td>C</td> <td>y.tab.c</td>
+</tr>
+<tr>
+  <td>.jy</td> <td>Java</td> <td>.java</td>
+</tr>
+<tr>
+  <td>.jsy</td> <td>JavaScript</td> <td>.js</td>
+</tr>
+<tr>
+  <td>.ply</td> <td>Perl</td> <td>.pl</td>
+</tr>
+</tbody>
+</table>
+
+出力されるパーサープログラムのファイル名は、
+C言語の場合はy.tab.cに固定されていますが、それ以外の言語では
+元のgrammarfile名から作られます。
+
+<pre class="def">
+kmyacc foo.y  →  y.tab.c
+kmyacc Foo.jy →  Foo.java
+kmyacc Foo.jsy → Foo.js
+kmyacc foo.ply → foo.pl
+</pre>
+
+<subsection title="オプション">
+オプションとして以下のものが指定できます。
+
+<dl>
+<dt>-d</dt>
+<dd>(C言語のみ)トークンの値とスタックの型YYSTYPEの定義を含んだファイルy.tab.hを生成する</dd>
+<dt>-v</dt>
+<dd>LR(0)アイテムと構文解析の状態遷移表を人間に分かるように記した
+ファイルy.outputを生成する。</dd>
+<dt>-l</dt>
+<dd>(C言語のみ)#line を出力ファイルに挿入しない。</dd>
+<dt>-t</dt>
+<dd>デバッグのためのトレース表示を行うコードを挿入する。
+C言語の場合は、このオプションの指定なしでも
+コンパイル時に <code>-DYYDEBUG</code>を指定すれば同じ効果が得られる。</dd>
+<dt>-a</dt>
+<dd>各意味アクションを独立した関数(orメソッド)にして
+yyparseから外に出す。コンパイラが大きな関数やメソッドを処理できない
+場合に指定する。
+</dd>
+<dt>-b <i>X</i></dt>
+<dd>(C言語のみ)出力ファイルの名前をy.tab.c, y.outputでなく
+<i>X</i>.tab.c, <i>X</i>.outputにする。</dd>
+<dt>-p <i>XX</i></dt>
+<dd>(C言語のみ)パーサーコード中の外部シンボルの名前をyyでなく
+<i>XX</i>で始まる名前に変える。
+複数のパーサーが一つのプログラムにリンクされる場合に、
+シンボルの衝突を避けるために指定する。</dd>
+<dt>-m <i>MODEL</i></dt>
+<dd>パーサーの原型となるファイルを指定する。省略時は、
+<code>/usr/local/lib/kmyacc.</code><i>LANG</i><code>.parser</code>
+というファイルが使われる(<i>LANG</i>はホスト言語の拡張子)。
+</dd>
+<dt>-L <i>LANG</i></dt>
+<dd>ホスト言語を明示的に指定する。
+現在は c, java, javascript, perl が指定できる。</dd>
+<dt>-n</dt>
+<dd>アクション中のsemantic valueの参照を名前で行うことを許す。
+C以外のホスト言語では自動的に指定される。
+</dd>
+<dt>-i</dt>
+<dd>アクション中の$$,$1,$2...の形式でのsemantic valueの参照を禁止し、
+名前による参照のみにする。Perlでは自動的に指定される。</dd>
+</dl>
+
+</subsection>
+
+</section>
+
+<section title="文法定義">
+基本的にはyaccと同じですが、以下に違いを示します。
+
+<table title="仕様">
+<thead>
+<tr>
+<th>項目</th>
+<th>意味</th>
+<th>yaccとの違い</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>%token</td>
+<td>終端記号の定義</td>
+<td>-</td>
+</tr>
+<tr>
+<td>%left</td>
+<td>左結合終端記号の定義</td>
+<td>-</td>
+</tr>
+<tr>
+<td>%right</td>
+<td>右結合終端記号の定義</td>
+<td>-</td>
+</tr>
+<tr>
+<td>%nonassoc</td>
+<td>非結合終端記号の定義</td>
+<td>-</td>
+</tr>
+<tr>
+<td>%{ ... %}</td>
+<td>コードの挿入</td>
+<td>Javaでは import を書く</td>
+</tr>
+<tr>
+<td>%union</td>
+<td>意味スタックの型定義</td>
+<td>C言語のみ使用可能</td>
+</tr>
+<tr>
+<td>%type</td>
+<td>終端記号、非終端記号の型定義</td>
+<td>C言語では%unionで宣言したフィールド名、<br/>
+Javaではクラス名</td>
+</tr>
+<tr>
+<td>%start</td>
+<td>開始記号定義</td>
+<td>-</td>
+</tr>
+<tr>
+<td>%expect <i>N</i></td>
+<td>shift/reduce conflictの数を指定</td>
+<td>拡張</td>
+</tr>
+<tr>
+<td>%pure_parser</td>
+<td>reentrantなパーサーを生成</td>
+<td>拡張</td>
+</tr>
+<tr>
+<td>$$, $1, $2...</td>
+<td>semantic valueの参照</td>
+<td>名前による参照も可能</td>
+</tr>
+</tbody>
+</table>
+
+最後の項目「semantic valueの参照」について補足します。
+
+kmyaccでは、アクション中のsemantic valueを、$$, $1, $2...の代わりに文法記号
+の名前で参照することができます(Cでは-nオプションの指定が必要)。
+
+以下に例を示します。
+<program>
+foo: bar '+' baz { foo = bar + baz; }
+</program>
+上のアクションは、{ $$ = $1 + $3; } と同じです。
+
+同じ文法記号が規則中に複数回現われる場合は、どの要素を指しているのかが
+曖昧なため、そのまま文法記号で参照するとエラーになってしまいます。
+
+こういう場合には文法記号の前に「名前@」を前置することにより、その名前
+でsemantic valueを参照することができます。
+<program>
+result@expr: addendum@expr '+' addenda@expr
+   { result = addendum + addenda; }
+</program>
+
+
+以下、文法定義ファイルの書き方を各言語別に説明します(Cは省略)。
+
+<subsection title="Java">
+Java版のパーサーは、単一のクラスとして生成されます。
+
+クラス名は、ソースファイルの名前から拡張子を除いて作られます。
+例えば、ソースがFoo.jyならクラス名は Foo となります。
+
+文法定義の次の %% 以降の部分は、このクラス内にそのままコピーされますが、
+%{ ... %} の中に記述したコードは、クラス定義の外側に展開されます。
+従って、package宣言や importはこの中に書く必要があります。
+
+<subsubsection title="アクション記述">
+
+Java版では、意味スタックはObjectとして宣言されており、
+ある記号に対し%typeによって型が指定されている場合、
+その型へのキャストが自動的に生成されます。
+
+例えば以下の文法定義を考えてみます。
+
+<program>
+%type &lt;Integer&gt; expr
+
+%%
+expr : expr '+' expr  { $$ = new Integer($1.intValue() + $3.intValue()); }
+</program>
+
+この場合、{}内のアクションは以下のようなJavaプログラムに展開されます。
+
+<program>
+{ yyval = new Integer(((Integer)yyastk[yysp-2]).intValue()
+        + ((Integer)yyastk[yysp-0]).intValue()); }
+</program>
+
+</subsubsection>
+
+<subsubsection title="構文エラーの扱い">
+
+以下に、アクション中でエラーの処理を行うための機能を説明します。
+C版ではマクロで提供されている機能ですが、Javaではマクロがないため、
+直接制御変数を書き換えたり参照したりする必要があります。
+参考までに括弧内にC版でのマクロ名を示しておきます。
+<dl>
+<dt>強制的に構文エラーを起こす(YYERROR)</dt>
+<dd>変数 yyparseerror に true を代入します。
+<program>
+{ yyparseerror = true; }
+</program>
+</dd>
+<dt>構文エラーの区切(yyerrok)</dt>
+<dd>yaccではエラーメッセージの雪崩を防ぐため、一度構文エラーが起こると
+3トークン正常にshiftされるまでは次のエラーメッセージを表示しないように
+なっています。
+これを止めて次のエラー検出を再開させるには、yyerrflagに0を代入します。
+<program>
+{ yyerrflag = 0; }
+</program>
+</dd>
+<dt>先読みのクリア(yyclearin)</dt>
+<dd>エラー処理に先立ち、先読みトークンを捨てるには yychar に -1 を代入します。
+<program>
+{ yychar = -1; }
+</program>
+</dd>
+<dt>エラーリカバリー中か否かの判定(YYRECOVERING)</dt>
+<dd>現在エラーリカバリー中であるかどうかを判定するには、
+変数 yyerrflag が0かどうかを調べます。
+<program>
+{ if (yyerrflag) hoge(); }
+</program>
+</dd>
+</dl>
+
+</subsubsection>
+
+<subsubsection title="インターフェース">
+生成されるパーサーのクラスメソッドは以下の通りです。
+
+<dl>
+<dt>public int yyparse()</dt>
+<dd>パーサーのエントリポイントです。
+正常に終了した、あるいはエラーが発生したが回復できた場合は0を、
+エラーから回復できなかった場合は1を返します。
+</dd>
+</dl>
+
+また、yyparse中からは以下のメソッドを呼出します。
+ユーザーはこれらのメソッドを%%以下のコード中で定義する必要があります。
+
+<dl>
+<dt>int yylex()</dt>
+<dd>字句解析のインターフェースです。
+トークンを読み出してその値を返します。
+返す値は、リテラルトークン(例:'+')かまたは%tokenで宣言されたトークンの値です。
+また、semantic valueは変数yylvalにセットします。
+
+字句解析クラスを独立したクラスとして定義する場合は、
+このメソッドでインターフェースの調整を行ってください。
+</dd>
+
+<dt>void yyerror(String msg)</dt>
+<dd>構文エラーが発生したときに呼出されるメソッドです。</dd>
+</dl>
+
+なお、トークンの値は、public static final intとして定義されます。従っ
+て、これらの値をクラスの外部から Foo.IDENTIFIER のように参照することが
+できます。
+
+</subsubsection>
+</subsection>
+
+<subsection title="JavaScript">
+生成されるパーサはJavaScriptのプログラムの形となっており、
+&lt;script&gt;タグは付加されていません。
+HTMLファイルとして使用可能な形にするためには、以下のような適切なヘッダ
+<program>
+%{
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Parser&lt;/title&gt;
+&lt;script type="text/javascript"&gt;
+&lt;!--
+%}
+</program>
+を、末尾にそれを閉じる以下のようなタグ
+<program>
+// --&gt;&lt;/script&gt;&lt;/head&gt;
+&lt;body&gt;...&lt;/body&gt;
+&lt;/html&gt;
+</program>
+を置く必要があります。
+
+JavaScriptは静的な型のない言語ですので、%typeは意味をもちません。
+
+生成されたパーサーはCと同様、function yyparse()が入口となります。
+
+ユーザは、function yylex()とyyerror(msg)を用意する必要があります。
+
+yylex()は入力トークンのsemantic valueを変数yylvalにセットし、その値を
+整数値で返します。
+
+yyerror(msg) は、エラーメッセージの表示を行う関数です。渡されたmsgの内
+容を表示します。
+
+</subsection>
+<subsection title="Perl">
+Perlは静的な型のない言語ですので、%typeは意味をもちません。
+
+アクション中のsemantic valueは、$$, $1, $2...の代わりにgrammar symbolの
+名前で参照します。従って、$で始まるPerlの変数は普通に使うことができます
+(前出の例を参照)。
+
+生成されたパーサは、Cと同様サブルーチンyyparse()がパーサの入口となります。
+
+ユーザはサブルーチンyylex()とyyerror(msg)を用意する必要があります。
+
+yylex()はCと同様にsemantic valueを$yylvalにセットし、トークンの値を整
+数値で返します。
+
+yyerror(msg) は、エラーメッセージの表示を行う関数です。渡されたmsgの内
+容を表示します。
+</subsection>
+</section>
+
+<section title="プロトタイプファイルの作り方">
+
+kmyaccでは、-m オプションで任意のプロトタイプファイルを指定することができます。
+
+プロトタイプファイルは、パーサーの原型となるソースプログラムで、
+ホスト言語ごとに別々のものが用意されており、
+言語の違いはほとんどこのファイルで吸収しています(一部はkmyacc本体で対応)。
+
+プロトタイプファイルの中では、表や定数を生成したり、
+条件によって別のコードを生成したりするための
+マクロ機能が使われています。
+これはC言語のプリプロセッサとは別のもので、kmyaccによって処理されます。
+
+以下、このマクロ機能について説明します。
+
+<subsection title="マクロ呼出し">
+プロトタイプ中のマクロ機能には、行単位のものと、文字単位のものがあります。
+
+行単位のものは、1行すべてがマクロ呼出しであり、他のコードは含むことができ
+ません。一方、文字単位のものはテキスト中の任意の場所に書くことができます。
+
+また、実装上の都合で、$includeと$semvalは書ける場所に制限があります。
+</subsection>
+
+<subsection title="値参照">
+事前に定義されたスカラー変数の値を参照する機能です。
+文字単位でソースのどの位置にも現われることができ、以下の形式をしています。
+<pre class="def">
+$(変数名)
+</pre>
+変数名としては、以下のものがあります。
+
+<pre class="def">
+YYSTATES, YYNLSTATES, YYINTERRTOK, YYUNEXPECTED,
+YYDEFAULT, YYTERMS, YYNONTERMS, YYBADCH, YYMAXLEX, 
+YYLAST, YYGLAST, YY2TBLSTATE, CLASSNAME, -p
+</pre>
+
+$(-p)は、-pオプションに記述されたプリフィックス値に展開されます。
+
+</subsection>
+<subsection title="$listvar">
+$listvar は、配列変数の値を展開する機能です。
+<pre class="def">
+$listvar 配列名
+</pre>
+行単位で、','で区切られた変数の値のリストに展開されます。
+
+配列名には、以下のものが指定できます。
+
+<pre class="x">
+yytranslate, yyaction, yycheck, yybase, yydefault,
+yygoto, yygcheck, yygbase, yygdefault, yylhs, yylen,
+terminals, nonterminals
+</pre>
+</subsection>
+
+<subsection title="$TYPEOF">
+$TYPEOF は、配列変数の型(char, short)に展開される機能です。
+<pre class="def">
+$TYPEOF(配列名)
+</pre>
+行の中の任意の位置に書くことができ、Cならばcharもしくはshortに、
+Javaならばbyteもしくはshortに展開されます。
+
+配列名には、以下のものが指定できます。
+
+<pre class="def">
+yytranslate, yycheck, yygcheck, yylhs, yylen
+</pre>
+</subsection>
+
+
+<subsection title="$if, $ifnot">
+$ifは、条件が成り立っているかどうかを調べ、成り立っているときのみ
+$endifまでのコードを生成します。$ifnotはその逆です。
+
+行単位であり、ネストは許されません。
+
+<pre class="def">
+$if 条件
+...
+$endif
+</pre>
+
+現在のところ記述できる条件は、オプション-t, -a, -pだけです。
+
+</subsection>
+
+<subsection title="$reduce">
+$reduceは、yaccのアクションの生成パターンを記述する行単位マクロです。
+<pre class="def">
+$reduce
+...
+[$noact
+...
+]
+$endreduce
+</pre>
+
+$reduceと$endreduceの間(または$noactの間)のコードが、
+アクションの数だけ生成されます。
+また、%nと書くとアクション番号に、
+%bと書くとアクションコード本体に展開されます。
+
+また、$noact と $endreduce の間のコードは、
+ユーザ定義のアクションがなかった場合に生成されるコードです。
+
+例:
+<program>
+          switch (yyn) {
+$reduce
+          case %n:
+            {%b} break;
+$endreduce
+          }
+</program>
+
+</subsection>
+
+<subsection title="$meta">
+$meta は、プロトタイプファイル中のマクロ機能呼出しを示すメタキャラクタ
+'$'を他の文字に変えます。
+<pre class="def">
+$meta <i>new-metacharacter</i>
+</pre>
+$metaの次の最初の空白でない文字が、新しいメタキャラクタとして$の代わりに使われます。
+
+以下の例では、!が新しくメタキャラクタとして使われます。
+<program>
+$meta !
+!include
+</program>
+
+なお、このメタキャラクタは、アクション中のsemantic valueの参照を示す$
+とは関係ありません。$meta指定があっても、アクション中でのsemantic value
+の参照には $ を使う必要があります。
+
+</subsection>
+<subsection title="$semval">
+$semvalは、アクション中のsemantic value($$, $1, $2...)をどのように
+展開するかを定義する機能です。
+これは必須であり、これを書かないとアクションは正常に展開されません。
+<pre class="def">
+$semval($) <i>body-for-$$-without-type</i>
+$semval($,%t) <i>body-for-$$-with-type</i>
+$semval(%n) <i>body-for-$n-without-type</i>
+$semval(%n,%t) <i>body-for-$n-with-type</i>
+</pre>
+
+semantic valueには$$と$数字の二種類があり、さらにそれぞれが %type によ
+る型指定の有無によって二つに分けられ、全体で4種類のバリエーションがあります。
+この4種類すべてを定義しなくてはなりません。
+
+$semval($)は、型なしの$$の展開形式を定義します。
+
+$semval($,%t)は、型つきの$$の展開形式を定義します。
+
+$semval(%n)は、型なしの$数字に対する展開形式を定義します。
+
+$semval(%n,%t)は、型つきの$数字に対する展開形式を定義します。
+
+どの定義でも、定義中に%tと書くと、それは型名(フィールド名)に置き換えられ、
+%nと書くと、それは$の後の数字に置き換えられます。
+
+$semvalは、$includeよりも先に現れなくてはいけません。
+
+C言語での例:
+<program>
+$semval($) yyval
+$semval($,%t) yyval.%t
+$semval(%n) YYASP(%n-%l)
+$semval(%n,%t) YYASP(%n-%l).%t
+</program>
+
+</subsection>
+<subsection title="$include">
+$includeは%{ ... %}の中身に展開される行単位マクロです。
+<pre class="def">
+$include
+</pre>
+
+$includeは$semvalマクロを除くすべてのマクロ呼出しに先行して書かなくてはいけません。
+また、$includeがないとパーサーコード全体が正常に作成されません。
+
+</subsection>
+<subsection title="$tailcode">
+$tailcodeは、文法定義ファイル中の最後の%%以降の部分に展開される行単位マクロです。
+<pre class="def">
+$tailcode
+</pre>
+
+</subsection>
+<subsection title="$union">
+$unionは、%union { ... } の中身に展開される行単位マクロです。
+<pre class="def">
+$union
+</pre>
+
+</subsection>
+<subsection title="$tokenval">
+$tokenvalは、終端記号の値定義を生成するための行単位マクロです。
+<pre class="def">
+$tokenval
+...
+$endtokenval
+</pre>
+
+$tokenvalと$endtokenvalの間が、文字定数以外の終端記号の個数分だけ
+繰り返し生成されます。
+そのさい、%nは終端記号の値の十進表記に、%sは終端記号の名前に展開されます。
+
+例えば
+<program>
+$tokenval
+  public static final int %s = %n;
+$endtokenval
+</program>
+は、終端記号IDENTIFIERとNUMBERが定義されているとき、
+以下のように展開されます。
+<program>
+  public static final int IDENTIFIER = 256;
+  public static final int NUMBER = 257;
+</program>
+
+</subsection>
+
+</section>
+
+
+</body>
+</doc>

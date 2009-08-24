@@ -1,0 +1,292 @@
+#!/usr/bin/perl
+#
+# KMyacc parser prototype file for perl.
+# This file is public domain.
+
+$meta !
+!semval($) $yyval
+!semval($,%t) $yyval
+!semval(%n) $yyastk[$yysp-(%l-%n)]
+!semval(%n,%t) $yyastk[$yysp-(%l-%n)]
+!include;
+
+
+!tokenval
+$%s = %n;
+!endtokenval
+
+
+!if -t
+$yydebug = 1;
+
+
+@yyterminals = (
+  !listvar terminals
+  , "???"
+);
+
+@yyproduction = (
+  !production-strings;
+);
+
+
+# Traditional Debug Mode
+sub YYTRACE_NEWSTATE {
+    my ($state, $sym) = @_;
+    if ($yydebug) {
+	print "% State $state Lookahead ",
+	      ($sym < 0 ? "--none--" : $yyterminals[$sym]), "\n";
+    }
+}
+
+sub YYTRACE_READ {
+    my ($sym) = @_;
+    if ($yydebug) {
+	print "% Reading $yyterminals[$sym]\n";
+    }
+}
+
+sub YYTRACE_SHIFT {
+    my ($sym) = @_;
+    if ($yydebug) {
+	print "% Shift $yyterminals[$sym]\n";
+    }
+}
+
+sub YYTRACE_ACCEPT {
+    if ($yydebug) { print "% Accepted.\n"; }
+}
+
+sub YYTRACE_REDUCE {
+    my ($n) = @_;
+    if ($yydebug) {
+	print "% Reduce by ($n) $yyproduction[$n]\n";
+    }
+}
+
+sub YYTRACE_POP {
+    my ($state) = @_;
+    if ($yydebug) {
+	print "% Recovering, uncovers state $state\n";
+    }
+}
+
+sub YYTRACE_DISCARD {
+    my ($sym) = @_;
+    if ($yydebug) {
+	print "% Discard $yyterminals[$sym]\n";
+    }
+}
+!endif
+
+
+
+@yytranslate = (
+  !listvar yytranslate
+  );
+
+$YYBADCH = !(YYBADCH);
+$YYMAXLEX = !(YYMAXLEX);
+$YYTERMS = !(YYTERMS);
+$YYNONTERMS = !(YYNONTERMS);
+
+@yyaction = (
+  !listvar yyaction
+  );
+
+$YYLAST = !(YYLAST);
+
+@yycheck = (
+  !listvar yycheck
+  );
+
+@yybase = (
+  !listvar yybase
+  );
+
+$YY2TBLSTATE = !(YY2TBLSTATE);
+
+@yydefault = (
+  !listvar yydefault
+  );
+
+
+
+@yygoto = (
+  !listvar yygoto
+  );
+
+$YYGLAST = !(YYGLAST);
+
+@yygcheck = (
+  !listvar yygcheck
+  );
+
+@yygbase = (
+  !listvar yygbase
+  );
+
+@yygdefault = (
+  !listvar yygdefault
+  );
+
+@yylhs = (
+  !listvar yylhs
+  );
+
+@yylen = (
+  !listvar yylen
+  );
+
+$YYSTATES = !(YYSTATES);
+$YYNLSTATES = !(YYNLSTATES);
+$YYINTERRTOK = !(YYINTERRTOK);
+$YYUNEXPECTED = !(YYUNEXPECTED);
+$YYDEFAULT = !(YYDEFAULT);
+
+sub yyparse {
+    my @yyastk = {};
+    my @yysstk = {};
+
+    my $yyn, $yyl;
+    my $yystate = 0;
+    my $yychar = -1;
+    my $yysp = 0;
+    my $yyerrflag = 0;
+
+    $yysstk[$yysp] = 0;
+    for (;;) {
+!if -t
+        YYTRACE_NEWSTATE($yystate, $yychar);
+!endif
+        if ($yybase[$yystate] == 0) {
+	    $yyn = $yydefault[$yystate];
+	} else {
+	    if ($yychar < 0) {
+		$yychar = &yylex();
+		$yychar = 0 if ($yychar <= 0);
+		$yychar = $yychar < $YYMAXLEX ? $yytranslate[$yychar] : $YYBADCH;
+!if -t
+                YYTRACE_READ($yychar);
+!endif
+            }
+	    if ((($yyn = $yybase[$yystate] + $yychar) >= 0
+		 && $yyn < $YYLAST && $yycheck[$yyn] == $yychar
+		 || ($yystate < $YY2TBLSTATE
+		     && ($yyn = $yybase[$yystate + $YYNLSTATES] + $yychar) >= 0
+		     && $yyn < $YYLAST && $yycheck[$yyn] == $yychar))
+		&& ($yyn = $yyaction[$yyn]) !!= $YYDEFAULT) {
+
+		if ($yyn > 0) {
+		    # shift
+
+!if -t
+		    YYTRACE_SHIFT($yychar);
+!endif
+		    $yysp++;
+
+		    $yysstk[$yysp] = $yystate = $yyn;
+		    $yyastk[$yysp] = $yylval;
+		    $yychar = -1;
+          
+		    $yyerrflag-- if ($yyerrflag > 0);
+			
+		    next if ($yyn < $YYNLSTATES);
+            
+		    # yyn >= YYNLSTATES means shift-and-reduce
+		    $yyn -= $YYNLSTATES;
+		} else {
+		    $yyn = -$yyn;
+		}
+	    } else {
+		$yyn = $yydefault[$yystate];
+	    }
+	}
+
+	for (;;) {
+	    # reduce/error
+	    if ($yyn == 0) {
+		# accept
+!if -t
+		YYTRACE_ACCEPT();
+!endif
+		return 0;
+	    }
+	    elsif ($yyn !!= $YYUNEXPECTED) {
+		# reduce
+		$yyl = $yylen[$yyn];
+		$yyval = $yyastk[$yysp-$yyl+1];
+!if -t
+		YYTRACE_REDUCE($yyn);
+!endif
+		# Following line will be replaced by reduce actions
+		switch: {
+		    goto ((
+!reduce
+			   'act%n',
+!noact
+			   'defact',
+!endreduce
+			   '')[$yyn]);
+!reduce
+		act%n: {%b} last switch;
+!endreduce
+		defact: last switch;
+		}
+		# Goto - shift nonterminal
+		$yysp -= $yyl;
+		$yyn = $yylhs[$yyn];
+		if (($yyp = $yygbase[$yyn] + $yysstk[$yysp]) >= 0
+		    && $yyp < $YYGLAST && $yygcheck[$yyp] == $yyn) {
+		    $yystate = $yygoto[$yyp];
+		} else {
+    		    $yystate = $yygdefault[$yyn];
+		}
+          
+		$yysp++;
+
+		$yysstk[$yysp] = $yystate;
+	        $yyastk[$yysp] = $yyval;
+	    }
+	    else {
+		# error
+		if ($yyerrflag == 3) {
+!if -t
+		    YYTRACE_DISCARD($yychar);
+!endif
+		    if ($yychar == 0) { return 1; }
+		    $yychar = -1;
+		} else {
+		    if ($yyerrflag == 0) {
+			&yyerror("syntax error");
+		    }
+		    $yyerrflag = 3;
+		    # Pop until error-expecting state uncovered
+		    while (!!(($yyn = $yybase[$yystate] + $YYINTERRTOK) >= 0
+			      && $yyn < $YYLAST && $yycheck[$yyn] == $YYINTERRTOK
+			      || ($yystate < $YY2TBLSTATE
+				  && ($yyn = $yybase[$yystate + $YYNLSTATES] + $YYINTERRTOK) >= 0
+				  && $yyn < $YYLAST && $yycheck[$yyn] == $YYINTERRTOK))) {
+			if ($yysp <= 0) { return 1; }
+			$yystate = $yysstk[--$yysp];
+!if -t
+			YYTRACE_POP($yystate);
+!endif
+		    }
+		    $yyn = $yyaction[$yyn];
+!if -t
+		    YYTRACE_SHIFT($YYINTERRTOK);
+!endif
+		    $yysstk[++$yysp] = $yystate = $yyn;
+		}
+	    }
+	    last if ($yystate < $YYNLSTATES);
+	    # >= $YYNLSTATES means shift-and-reduce
+	    $yyn = $yystate - $YYNLSTATES;
+	}
+    }
+    die "Cannot happen: control reached here.\n";
+}
+
+
+!tailcode;

@@ -1,0 +1,741 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+	"http://www.w3.org/TR/REC-html401/strict.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+<meta name="generator" content="SmartDoc 1.1">
+<title>KMyaccユーザーズガイド</title>
+<link rel="stylesheet" type="text/css" href="sdoc.css">
+<script type="text/javascript">
+<!--
+/*
+ * HTML4JavaScript.js
+ *
+ * @since   Nov. 17, 1998
+ * @version Feb. 18, 2002
+ * @author  ASAMI, Tomoharu (asami@XMLSmartDoc.org)
+ */
+var backupColor=null;
+var backupBGColor=null;
+var backupFontStyle=null;
+var backupIDColor=null;
+var backupIDBGColor=null;
+var backupIDFontStyle=null;
+var backupIDBorderStyle=null;
+
+var backupOnKeyDown=null;
+
+function normal(element) {
+  if (document.all) {
+    if (backupColor != null) {
+      element.style.color=backupColor;
+      backupColor=null;
+    }
+    if (backupBGColor != null) {
+      element.style.background=backupBGColor;
+      backupBGColor=null;
+    }
+    if (backupFontStyle != null) {
+      element.style.fontStyle=backupFontStyle;
+      backupFontStyle=null;
+    }
+    var id = null;
+    if (element.href != null) {
+      id = element.href;
+      id = id.substring(id.indexOf("#") + 1);
+    }
+    if (id != null) {
+      var target = document.all.item(id, 0);
+      if (backupIDColor != null) {
+        target.style.color=backupIDColor;
+        backupIDColor=null;
+      }
+      if (backupIDBGColor != null) {
+        target.style.background=backupIDBGColor;
+        backupIDBGColor=null;
+      }
+      if (backupIDFontStyle != null) {
+        target.style.fontStyle=backupIDFontStyle;
+        backupIDFontStyle=null;
+      }
+      if (backupIDBorderStyle != null) {
+        target.style.borderStyle=backupIDBorderStyle;
+        backupIDBorderStyle=null;
+      }
+    }
+  }
+}
+
+function hilight(element) {
+  if (document.all) {
+    backupBGColor=element.style.background;
+    element.style.background="gold";
+  }
+}
+
+function hilightString(element, color) {
+  if (color == null) {
+    color="darkolivegreen";
+  }
+  if (document.all) {
+    backupColor=element.style.color;
+    backupFontStyle=element.style.fontStyle;
+    element.style.color=color;
+  }
+}
+
+function hilightSelflink(element, color) {
+  if (color == null) {
+    color="darkolivegreen";
+  }
+  if (document.all) {
+    backupColor=element.style.color;
+    backupBGColor=element.style.background;
+    backupFontStyle=element.style.fontStyle;
+    element.style.color=color;
+    var id = null;
+    if (element.href != null) {
+      id = element.href;
+      id = id.substring(id.indexOf("#") + 1);
+    }
+    if (id != null) {
+      var target = document.all.item(id, 0);
+      backupIDColor=target.style.color;
+//      backupIDBGColor=target.style.background;
+//      backupIDFontStyle=target.style.fontStyle;
+      backupIDBorderStyle=target.style.borderStyle;
+      target.style.color="red";
+      target.style.borderStyle="outset";
+    }
+  }
+}
+
+function hilightHyperlink(element, color) {
+  if (color == null) {
+    color="darkorange";
+  }
+  if (document.all) {
+    backupColor=element.style.color;
+    backupBGColor=element.style.background;
+    backupFontStyle=element.style.fontStyle;
+    element.style.color=color;
+  }
+}
+
+function hilightExternallink(element, color) {
+  if (color == null) {
+    color="purple";
+  }
+  if (document.all) {
+    backupColor=element.style.color;
+    backupBGColor=element.style.background;
+    backupFontStyle=element.style.fontStyle;
+    element.style.color=color;
+  }
+}
+
+function toggleChildren(node) {
+  if (document.all) {
+    for (i = 0;i < node.children.length;i++) {
+      var child = node.children[i];
+      if (child.className == "dynamic") {
+        if (child.style.display == "") {
+            child.style.display = "none";
+        } else {
+            child.style.display = "";
+        }
+      }
+    }
+  }
+}
+
+function toggleDynamic(node) {
+  if (document.all) {
+    if (node.tagName == "LI") {
+      toggleChildren(node);
+    }
+  }
+}
+
+function isMsie4orGreater() { 
+  var ua = window.navigator.userAgent; var msie = ua.indexOf ("MSIE");
+  if (msie > 0) {
+    return (parseInt (ua.substring (msie+5, ua.indexOf (".", msie))) >= 4)   
+      && (ua.indexOf ("MSIE 4.0b") <0);
+  } else {
+    return false;
+  }
+}
+
+function keyEventHandler() {
+  if (document.all) {
+    if (event.keyCode == 13) {
+      var child = document.all.item("doc_next_page_", 0);
+      if (child != null) {
+        location.href = child.href;
+      }
+    } else if (event.keyCode == 39) {
+      var child = document.all.item("doc_next_page_", 0);
+      if (child != null) {
+        location.href = child.href;
+      }
+    } else if (event.keyCode = 37) {
+      var child = document.all.item("doc_prev_page_", 0);
+      if (child != null) {
+        location.href = child.href;
+      }
+    } else {
+      backupOnKeyDown();
+    }
+  }
+}
+
+function setOHPHandler() {
+  backupOnKeyDown=document.onkeydown;
+  document.onkeydown=keyEventHandler;
+}
+// -->
+</script>
+</head>
+<body>
+<div style="text-align:right"><a href="http://www.XMLSmartDoc.org" target="_top"><span style="color:#4F5952;background:#EE8362;font-family:sans-serif;font-size:xx-small;text-decoration:none">Powered by </span><span style="color:#058258;background:#EE8362;font-family:fantasy, sans-serif;font-size:x-small;text-decoration:none">SmartDoc</span></a></div>
+
+<h1 class="title">KMyaccユーザーズガイド</h1>
+
+<p>kmyaccはyaccやbisonと同じLALRパーサージェネレータです。yaccと互換性があり、生成される表が小さく、ホスト言語としてC以外にJava, JavaScript,Perlも使うことができます。</p>
+<p>なおこの文書の内容は、予告なく変更される可能性があることをあらかじめ御了承ください。</p>
+
+<h2 id="doc1_8">プログラムの入手とインストール</h2>
+
+<p class="first_ja">最新のソースコード(ベータ版)は<a href="kmyacc-4.1.4.tar.gz" onmouseover="hilightHyperlink(this)" onmouseout="normal(this)">kmyacc-4.1.4.tar.gz</a>です。ソースのみでバイナリは含まれていません。</p>
+<p>コンパイルするには、ANSI Cコンパイラ(gccで十分)が必要です。</p>
+<p>以下のコマンド</p>
+
+<pre id="doc1_13" class="program">
+ gzip -d kmyacc-4.1.4.tar.gz | tar xvf -
+</pre>
+
+<p>でアーカイブを展開するとkmyacc-4.1.4というディレクトリができるので、この中に移動します。</p>
+<p>この中のMakefile中の</p>
+
+<pre id="doc1_16" class="program">
+BIN = /usr/local/bin
+PARLIB = /usr/local/lib
+</pre>
+
+<p>を適切なインストール先に変更してください。BINはkmyaccバイナリが置かれる場所、PARLIBはパーサーのプロトタイプファイルが置かれる場所です。</p>
+<p>そして、</p>
+
+<pre id="doc1_19" class="program">
+make
+make install
+</pre>
+
+<p>でコンパイル・インストールが完了します。</p>
+
+<h2 id="doc1_23">使用方法</h2>
+
+<p class="first_ja">kmyaccの起動の書式は以下の通りです。</p>
+
+<pre class="def">
+  kmyacc [ -dvltani ] [ -b <i>X</i> ] [ -p <i>XX</i> ] [ -m <i>MODEL</i> ] [ -L <i>LANG</i> ] <i>grammarfile</i>
+</pre>
+
+<p><i>grammerfile</i>にはyaccソースを指定します。kmyaccはこのファイルの拡張子から、以下のルールに従ってホスト言語を推定します。</p>
+
+<div class="table">
+<table id="doc1_46" class="data" rules="groups">
+<caption>拡張子と言語の対応</caption>
+<colgroup span="3">
+<col align="center">
+<col align="center">
+<col align="center">
+</colgroup>
+<thead>
+<tr class="even">
+<th align="center">yacc拡張子</th>
+<th align="center">ホスト言語</th>
+<th align="center">出力ファイル拡張子</th>
+</tr>
+</thead>
+<tbody>
+<tr class="even">
+<td>.y</td>
+<td>C</td>
+<td>y.tab.c</td>
+</tr>
+<tr class="odd">
+<td>.jy</td>
+<td>Java</td>
+<td>.java</td>
+</tr>
+<tr class="even">
+<td>.jsy</td>
+<td>JavaScript</td>
+<td>.js</td>
+</tr>
+<tr class="odd">
+<td>.ply</td>
+<td>Perl</td>
+<td>.pl</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<p>出力されるパーサープログラムのファイル名は、C言語の場合はy.tab.cに固定されていますが、それ以外の言語では元のgrammarfile名から作られます。</p>
+
+<pre class="def">
+kmyacc foo.y  →  y.tab.c
+kmyacc Foo.jy →  Foo.java
+kmyacc Foo.jsy → Foo.js
+kmyacc foo.ply → foo.pl
+</pre>
+
+
+<h3 id="doc1_123">オプション</h3>
+
+<p class="first_ja">オプションとして以下のものが指定できます。</p>
+
+<dl>
+<dt>-d
+<dd>(C言語のみ)トークンの値とスタックの型YYSTYPEの定義を含んだファイルy.tab.hを生成する
+<dt>-v
+<dd>LR(0)アイテムと構文解析の状態遷移表を人間に分かるように記したファイルy.outputを生成する。
+<dt>-l
+<dd>(C言語のみ)#lineを出力ファイルに挿入しない。
+<dt>-t
+<dd>デバッグのためのトレース表示を行うコードを挿入する。C言語の場合は、このオプションの指定なしでもコンパイル時に<code>-DYYDEBUG</code>を指定すれば同じ効果が得られる。
+<dt>-a
+<dd>各意味アクションを独立した関数(orメソッド)にしてyyparseから外に出す。コンパイラが大きな関数やメソッドを処理できない場合に指定する。
+<dt>-b <i>X</i>
+<dd>(C言語のみ)出力ファイルの名前をy.tab.c, y.outputでなく<i>X</i>.tab.c, <i>X</i>.outputにする。
+<dt>-p <i>XX</i>
+<dd>(C言語のみ)パーサーコード中の外部シンボルの名前をyyでなく<i>XX</i>で始まる名前に変える。複数のパーサーが一つのプログラムにリンクされる場合に、シンボルの衝突を避けるために指定する。
+<dt>-m <i>MODEL</i>
+<dd>パーサーの原型となるファイルを指定する。省略時は、<code>/usr/local/lib/kmyacc.</code><i>LANG</i><code>.parser</code>というファイルが使われる(<i>LANG</i>はホスト言語の拡張子)。
+<dt>-L <i>LANG</i>
+<dd>ホスト言語を明示的に指定する。現在はc, java, javascript, perlが指定できる。
+<dt>-n
+<dd>アクション中のsemantic valueの参照を名前で行うことを許す。C以外のホスト言語では自動的に指定される。
+<dt>-i
+<dd>アクション中の$$,$1,$2...の形式でのsemantic valueの参照を禁止し、名前による参照のみにする。Perlでは自動的に指定される。</dl>
+
+
+<h2 id="doc1_226">文法定義</h2>
+
+<p class="first_ja">基本的にはyaccと同じですが、以下に違いを示します。</p>
+
+<div class="table">
+<table id="doc1_228" class="data" rules="groups">
+<caption>仕様</caption>
+<colgroup span="3">
+<col>
+<col>
+<col>
+</colgroup>
+<thead>
+<tr class="even">
+<th align="center">項目</th>
+<th align="center">意味</th>
+<th align="center">yaccとの違い</th>
+</tr>
+</thead>
+<tbody>
+<tr class="even">
+<td>%token</td>
+<td>終端記号の定義</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>%left</td>
+<td>左結合終端記号の定義</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>%right</td>
+<td>右結合終端記号の定義</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>%nonassoc</td>
+<td>非結合終端記号の定義</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>%{ ... %}</td>
+<td>コードの挿入</td>
+<td>Javaではimportを書く</td>
+</tr>
+<tr class="odd">
+<td>%union</td>
+<td>意味スタックの型定義</td>
+<td>C言語のみ使用可能</td>
+</tr>
+<tr class="even">
+<td>%type</td>
+<td>終端記号、非終端記号の型定義</td>
+<td>C言語では%unionで宣言したフィールド名、<br></br>Javaではクラス名</td>
+</tr>
+<tr class="odd">
+<td>%start</td>
+<td>開始記号定義</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td>%expect <i>N</i></td>
+<td>shift/reduce conflictの数を指定</td>
+<td>拡張</td>
+</tr>
+<tr class="odd">
+<td>%pure_parser</td>
+<td>reentrantなパーサーを生成</td>
+<td>拡張</td>
+</tr>
+<tr class="even">
+<td>$$, $1, $2...</td>
+<td>semantic valueの参照</td>
+<td>名前による参照も可能</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<p>最後の項目「semantic valueの参照」について補足します。</p>
+<p>kmyaccでは、アクション中のsemantic valueを、$$, $1, $2...の代わりに文法記号の名前で参照することができます(Cでは-nオプションの指定が必要)。</p>
+<p>以下に例を示します。</p>
+
+<pre id="doc1_385" class="program">
+foo: bar '+' baz { foo = bar + baz; }
+</pre>
+
+<p>上のアクションは、{ $$ = $1 + $3; }と同じです。</p>
+<p>同じ文法記号が規則中に複数回現われる場合は、どの要素を指しているのかが曖昧なため、そのまま文法記号で参照するとエラーになってしまいます。</p>
+<p>こういう場合には文法記号の前に「名前@」を前置することにより、その名前でsemantic valueを参照することができます。</p>
+
+<pre id="doc1_388" class="program">
+result@expr: addendum@expr '+' addenda@expr
+   { result = addendum + addenda; }
+</pre>
+
+<p>以下、文法定義ファイルの書き方を各言語別に説明します(Cは省略)。</p>
+
+<h3 id="doc1_391">Java</h3>
+
+<p class="first_ja">Java版のパーサーは、単一のクラスとして生成されます。</p>
+<p>クラス名は、ソースファイルの名前から拡張子を除いて作られます。例えば、ソースがFoo.jyならクラス名はFooとなります。</p>
+<p>文法定義の次の%%以降の部分は、このクラス内にそのままコピーされますが、%{ ... %}の中に記述したコードは、クラス定義の外側に展開されます。従って、package宣言やimportはこの中に書く必要があります。</p>
+
+<h4 id="doc1_393">アクション記述</h4>
+
+<p class="first_ja">Java版では、意味スタックはObjectとして宣言されており、ある記号に対し%typeによって型が指定されている場合、その型へのキャストが自動的に生成されます。</p>
+<p>例えば以下の文法定義を考えてみます。</p>
+
+<pre id="doc1_395" class="program">
+%type &lt;Integer&gt; expr
+
+%%
+expr : expr '+' expr  { $$ = new Integer($1.intValue() + $3.intValue()); }
+</pre>
+
+<p>この場合、{}内のアクションは以下のようなJavaプログラムに展開されます。</p>
+
+<pre id="doc1_398" class="program">
+{ yyval = new Integer(((Integer)yyastk[yysp-2]).intValue()
+        + ((Integer)yyastk[yysp-0]).intValue()); }
+</pre>
+
+
+<h4 id="doc1_402">構文エラーの扱い</h4>
+
+<p class="first_ja">以下に、アクション中でエラーの処理を行うための機能を説明します。C版ではマクロで提供されている機能ですが、Javaではマクロがないため、直接制御変数を書き換えたり参照したりする必要があります。参考までに括弧内にC版でのマクロ名を示しておきます。</p>
+
+<dl>
+<dt>強制的に構文エラーを起こす(YYERROR)
+<dd>変数yyparseerrorにtrueを代入します。
+<pre id="doc1_411" class="program">
+{ yyparseerror = true; }
+</pre>
+<dt>構文エラーの区切(yyerrok)
+<dd>yaccではエラーメッセージの雪崩を防ぐため、一度構文エラーが起こると3トークン正常にshiftされるまでは次のエラーメッセージを表示しないようになっています。これを止めて次のエラー検出を再開させるには、yyerrflagに0を代入します。
+<pre id="doc1_420" class="program">
+{ yyerrflag = 0; }
+</pre>
+<dt>先読みのクリア(yyclearin)
+<dd>エラー処理に先立ち、先読みトークンを捨てるにはyycharに-1を代入します。
+<pre id="doc1_429" class="program">
+{ yychar = -1; }
+</pre>
+<dt>エラーリカバリー中か否かの判定(YYRECOVERING)
+<dd>現在エラーリカバリー中であるかどうかを判定するには、変数yyerrflagが0かどうかを調べます。
+<pre id="doc1_438" class="program">
+{ if (yyerrflag) hoge(); }
+</pre></dl>
+
+
+<h4 id="doc1_444">インターフェース</h4>
+
+<p class="first_ja">生成されるパーサーのクラスメソッドは以下の通りです。</p>
+
+<dl>
+<dt>public int yyparse()
+<dd>パーサーのエントリポイントです。正常に終了した、あるいはエラーが発生したが回復できた場合は0を、エラーから回復できなかった場合は1を返します。</dl>
+
+<p>また、yyparse中からは以下のメソッドを呼出します。ユーザーはこれらのメソッドを%%以下のコード中で定義する必要があります。</p>
+
+<dl>
+<dt>int yylex()
+<dd><p>字句解析のインターフェースです。トークンを読み出してその値を返します。返す値は、リテラルトークン(例:'+')かまたは%tokenで宣言されたトークンの値です。また、semantic valueは変数yylvalにセットします。</p>
+<p>字句解析クラスを独立したクラスとして定義する場合は、このメソッドでインターフェースの調整を行ってください。</p>
+<dt>void yyerror(String msg)
+<dd>構文エラーが発生したときに呼出されるメソッドです。</dl>
+
+<p>なお、トークンの値は、public static final intとして定義されます。従って、これらの値をクラスの外部からFoo.IDENTIFIERのように参照することができます。</p>
+
+<h3 id="doc1_472">JavaScript</h3>
+
+<p class="first_ja">生成されるパーサはJavaScriptのプログラムの形となっており、&lt;script&gt;タグは付加されていません。HTMLファイルとして使用可能な形にするためには、以下のような適切なヘッダ</p>
+
+<pre id="doc1_474" class="program">
+%{
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Parser&lt;/title&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+&lt;!--
+%}
+</pre>
+
+<p>を、末尾にそれを閉じる以下のようなタグ</p>
+
+<pre id="doc1_477" class="program">
+// --&gt;&lt;/script&gt;&lt;/head&gt;
+&lt;body&gt;...&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+<p>を置く必要があります。</p>
+<p>JavaScriptは静的な型のない言語ですので、%typeは意味をもちません。</p>
+<p>生成されたパーサーはCと同様、function yyparse()が入口となります。</p>
+<p>ユーザは、function yylex()とyyerror(msg)を用意する必要があります。</p>
+<p>yylex()は入力トークンのsemantic valueを変数yylvalにセットし、その値を整数値で返します。</p>
+<p>yyerror(msg)は、エラーメッセージの表示を行う関数です。渡されたmsgの内容を表示します。</p>
+
+<h3 id="doc1_481">Perl</h3>
+
+<p class="first_ja">Perlは静的な型のない言語ですので、%typeは意味をもちません。</p>
+<p>アクション中のsemantic valueは、$$, $1, $2...の代わりにgrammar symbolの名前で参照します。従って、$で始まるPerlの変数は普通に使うことができます(前出の例を参照)。</p>
+<p>生成されたパーサは、Cと同様サブルーチンyyparse()がパーサの入口となります。</p>
+<p>ユーザはサブルーチンyylex()とyyerror(msg)を用意する必要があります。</p>
+<p>yylex()はCと同様にsemantic valueを$yylvalにセットし、トークンの値を整数値で返します。</p>
+<p>yyerror(msg)は、エラーメッセージの表示を行う関数です。渡されたmsgの内容を表示します。</p>
+
+<h2 id="doc1_485">プロトタイプファイルの作り方</h2>
+
+<p class="first_ja">kmyaccでは、-mオプションで任意のプロトタイプファイルを指定することができます。</p>
+<p>プロトタイプファイルは、パーサーの原型となるソースプログラムで、ホスト言語ごとに別々のものが用意されており、言語の違いはほとんどこのファイルで吸収しています(一部はkmyacc本体で対応)。</p>
+<p>プロトタイプファイルの中では、表や定数を生成したり、条件によって別のコードを生成したりするためのマクロ機能が使われています。これはC言語のプリプロセッサとは別のもので、kmyaccによって処理されます。</p>
+<p>以下、このマクロ機能について説明します。</p>
+
+<h3 id="doc1_487">マクロ呼出し</h3>
+
+<p class="first_ja">プロトタイプ中のマクロ機能には、行単位のものと、文字単位のものがあります。</p>
+<p>行単位のものは、1行すべてがマクロ呼出しであり、他のコードは含むことができません。一方、文字単位のものはテキスト中の任意の場所に書くことができます。</p>
+<p>また、実装上の都合で、$includeと$semvalは書ける場所に制限があります。</p>
+
+<h3 id="doc1_490">値参照</h3>
+
+<p class="first_ja">事前に定義されたスカラー変数の値を参照する機能です。文字単位でソースのどの位置にも現われることができ、以下の形式をしています。</p>
+
+<pre class="def">
+$(変数名)
+</pre>
+
+<p>変数名としては、以下のものがあります。</p>
+
+<pre class="def">
+YYSTATES, YYNLSTATES, YYINTERRTOK, YYUNEXPECTED,
+YYDEFAULT, YYTERMS, YYNONTERMS, YYBADCH, YYMAXLEX, 
+YYLAST, YYGLAST, YY2TBLSTATE, CLASSNAME, -p
+</pre>
+
+<p>$(-p)は、-pオプションに記述されたプリフィックス値に展開されます。</p>
+
+<h3 id="doc1_499">$listvar</h3>
+
+<p class="first_ja">$listvarは、配列変数の値を展開する機能です。</p>
+
+<pre class="def">
+$listvar 配列名
+</pre>
+
+<p>行単位で、','で区切られた変数の値のリストに展開されます。</p>
+<p>配列名には、以下のものが指定できます。</p>
+
+<pre class="x">
+yytranslate, yyaction, yycheck, yybase, yydefault,
+yygoto, yygcheck, yygbase, yygdefault, yylhs, yylen,
+terminals, nonterminals
+</pre>
+
+
+<h3 id="doc1_508">$TYPEOF</h3>
+
+<p class="first_ja">$TYPEOFは、配列変数の型(char, short)に展開される機能です。</p>
+
+<pre class="def">
+$TYPEOF(配列名)
+</pre>
+
+<p>行の中の任意の位置に書くことができ、Cならばcharもしくはshortに、Javaならばbyteもしくはshortに展開されます。</p>
+<p>配列名には、以下のものが指定できます。</p>
+
+<pre class="def">
+yytranslate, yycheck, yygcheck, yylhs, yylen
+</pre>
+
+
+<h3 id="doc1_517">$if, $ifnot</h3>
+
+<p class="first_ja">$ifは、条件が成り立っているかどうかを調べ、成り立っているときのみ$endifまでのコードを生成します。$ifnotはその逆です。</p>
+<p>行単位であり、ネストは許されません。</p>
+
+<pre class="def">
+$if 条件
+...
+$endif
+</pre>
+
+<p>現在のところ記述できる条件は、オプション-t, -a, -pだけです。</p>
+
+<h3 id="doc1_523">$reduce</h3>
+
+<p class="first_ja">$reduceは、yaccのアクションの生成パターンを記述する行単位マクロです。</p>
+
+<pre class="def">
+$reduce
+...
+[$noact
+...
+]
+$endreduce
+</pre>
+
+<p>$reduceと$endreduceの間(または$noactの間)のコードが、アクションの数だけ生成されます。また、%nと書くとアクション番号に、%bと書くとアクションコード本体に展開されます。</p>
+<p>また、$noactと$endreduceの間のコードは、ユーザ定義のアクションがなかった場合に生成されるコードです。</p>
+<p>例:</p>
+
+<pre id="doc1_528" class="program">
+          switch (yyn) {
+$reduce
+          case %n:
+            {%b} break;
+$endreduce
+          }
+</pre>
+
+
+<h3 id="doc1_532">$meta</h3>
+
+<p class="first_ja">$metaは、プロトタイプファイル中のマクロ機能呼出しを示すメタキャラクタ'$'を他の文字に変えます。</p>
+
+<pre class="def">
+$meta <i>new-metacharacter</i>
+</pre>
+
+<p>$metaの次の最初の空白でない文字が、新しいメタキャラクタとして$の代わりに使われます。</p>
+<p>以下の例では、!が新しくメタキャラクタとして使われます。</p>
+
+<pre id="doc1_540" class="program">
+$meta !
+!include
+</pre>
+
+<p>なお、このメタキャラクタは、アクション中のsemantic valueの参照を示す$とは関係ありません。$meta指定があっても、アクション中でのsemantic valueの参照には$を使う必要があります。</p>
+
+<h3 id="doc1_544">$semval</h3>
+
+<p class="first_ja">$semvalは、アクション中のsemantic value($$, $1, $2...)をどのように展開するかを定義する機能です。これは必須であり、これを書かないとアクションは正常に展開されません。</p>
+
+<pre class="def">
+$semval($) <i>body-for-$$-without-type</i>
+$semval($,%t) <i>body-for-$$-with-type</i>
+$semval(%n) <i>body-for-$n-without-type</i>
+$semval(%n,%t) <i>body-for-$n-with-type</i>
+</pre>
+
+<p>semantic valueには$$と$数字の二種類があり、さらにそれぞれが%typeによる型指定の有無によって二つに分けられ、全体で4種類のバリエーションがあります。この4種類すべてを定義しなくてはなりません。</p>
+<p>$semval($)は、型なしの$$の展開形式を定義します。</p>
+<p>$semval($,%t)は、型つきの$$の展開形式を定義します。</p>
+<p>$semval(%n)は、型なしの$数字に対する展開形式を定義します。</p>
+<p>$semval(%n,%t)は、型つきの$数字に対する展開形式を定義します。</p>
+<p>どの定義でも、定義中に%tと書くと、それは型名(フィールド名)に置き換えられ、%nと書くと、それは$の後の数字に置き換えられます。</p>
+<p>$semvalは、$includeよりも先に現れなくてはいけません。</p>
+<p>C言語での例:</p>
+
+<pre id="doc1_561" class="program">
+$semval($) yyval
+$semval($,%t) yyval.%t
+$semval(%n) YYASP(%n-%l)
+$semval(%n,%t) YYASP(%n-%l).%t
+</pre>
+
+
+<h3 id="doc1_565">$include</h3>
+
+<p class="first_ja">$includeは%{ ... %}の中身に展開される行単位マクロです。</p>
+
+<pre class="def">
+$include
+</pre>
+
+<p>$includeは$semvalマクロを除くすべてのマクロ呼出しに先行して書かなくてはいけません。また、$includeがないとパーサーコード全体が正常に作成されません。</p>
+
+<h3 id="doc1_571">$tailcode</h3>
+
+<p class="first_ja">$tailcodeは、文法定義ファイル中の最後の%%以降の部分に展開される行単位マクロです。</p>
+
+<pre class="def">
+$tailcode
+</pre>
+
+
+<h3 id="doc1_577">$union</h3>
+
+<p class="first_ja">$unionは、%union { ... }の中身に展開される行単位マクロです。</p>
+
+<pre class="def">
+$union
+</pre>
+
+
+<h3 id="doc1_583">$tokenval</h3>
+
+<p class="first_ja">$tokenvalは、終端記号の値定義を生成するための行単位マクロです。</p>
+
+<pre class="def">
+$tokenval
+...
+$endtokenval
+</pre>
+
+<p>$tokenvalと$endtokenvalの間が、文字定数以外の終端記号の個数分だけ繰り返し生成されます。そのさい、%nは終端記号の値の十進表記に、%sは終端記号の名前に展開されます。</p>
+<p>例えば</p>
+
+<pre id="doc1_588" class="program">
+$tokenval
+  public static final int %s = %n;
+$endtokenval
+</pre>
+
+<p>は、終端記号IDENTIFIERとNUMBERが定義されているとき、以下のように展開されます。</p>
+
+<pre id="doc1_591" class="program">
+  public static final int IDENTIFIER = 256;
+  public static final int NUMBER = 257;
+</pre>
+
+</body>
+</html>

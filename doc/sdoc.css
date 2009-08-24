@@ -1,0 +1,469 @@
+A:link {
+  color: green;
+}
+
+A:visited {
+  color: black;
+}
+
+A:hover{
+  color: gold;
+};
+
+body {
+  background: white;
+  font-family: times, serif;
+}
+
+h1 {
+}
+
+h1.title {
+  color: white;
+  text-align: center;
+  background: #9999FF;
+  border-style: none;
+  padding: 10pt;
+}
+
+h1.part {
+  font-weight: bold;
+  color: black;
+  background: #9999FF;
+  border-width: 1px;
+  border-style: solid;
+  padding: 20pt;
+}
+
+h1.chapter {
+  color: white;
+  background: #9999FF;
+  border-width: 1px;
+  border-style: solid;
+  text-align: left;
+  padding: 5pt;
+}
+
+h2 {
+  color: white;
+  background: #9999FF;
+  border-width: 1px;
+  border-style: none;
+  padding: 3pt;
+}
+
+h3 {
+  color: white;
+  background: #9999FF;
+  border-width: 1px;
+  border-style: none;
+  padding: 2pt;
+}
+
+h4 {
+  color: black;
+  border-width: 1px;
+  border-style: none;
+  padding: 1pt;
+}
+
+dfn {
+  font-weight: bold;
+  font-style: normal;
+}
+
+code {
+  font-family: helvetica, sans-serif;
+  font-weight: bold;
+}
+
+li p {
+  text-indent: 0pt;
+}
+
+blockquote {
+  border-width: 1px;
+  border-style: solid;
+}
+
+dt {
+  margin-left: 2em;
+  color: #663333;
+  font-weight: bold;
+}
+
+dd {
+  margin-left: 4em;
+  margin-top: 5pt;
+  margin-right: 100pt;
+  margin-bottom: 10pt;
+}
+
+th p {
+  text-indent: 0pt;
+}
+
+td p {
+  text-indent: 0pt;
+}
+
+div.table {
+  text-align: center;
+}
+
+table.data {
+  text-align: center;
+  border-width: 1px;
+  border-collapse: separate;
+  border-color: black;
+  margin-top: 10pt;
+  margin-bottom: 10pt;
+  background-color: grey;
+}
+
+table.data caption {
+  background-color: gainsboro;
+  font-weight: bold;
+}
+
+table.data th {
+  color: black;
+  background-color: gainsboro;
+}
+
+table.data td {
+  background-color: gainsboro;
+}
+
+table.data td.key {
+  background-color: gainsboro;
+  font-weight: bold;
+}
+
+
+table.menu {
+  margin-top: 10pt;
+  margin-bottom: 10pt;
+  text-align: center;
+}
+
+table.menu caption {
+  background-color: gainsboro;
+  font-weight: bold;
+}
+
+table.menu th {
+  color: black;
+  background-color: gainsboro;
+}
+
+table.menu td {
+  color: black;
+  background-color: gainsboro;
+  font-weight: bold;
+  padding: 10pt;
+}
+
+table.menu td.key {
+  font-size: x-large;
+  color: black;
+  background-color: gainsboro;
+  font-weight: bold;
+  padding: 10pt;
+}
+
+table.menu td.key A:link {
+  color: RoyalBlue;
+}
+
+table.menu td.key A:visited {
+  color: RoyalBlue;
+}
+
+table.navigator {
+}
+
+table.navigator td {
+  text-align: center;
+  font-weight: bold;
+}
+
+table.languages {
+  margin-bottom: 0pt;
+  margin-top: 0pt;
+  font-size: x-small;
+}
+
+table.languages td.current {
+}
+
+table.languages td.other {
+  background-color: gainsboro;
+}
+
+p {
+  margin: 5pt 0pt;
+  text-indent: 0em;
+}
+
+p ja {
+  margin: 5pt 0pt;
+  text-indent: 0em;
+}
+
+p.first {
+  margin: 5pt 0pt;
+  text-indent: 0em;
+}
+
+p.first_ja {
+  margin: 5pt 0pt;
+  text-indent: 0em;
+}
+
+div.title {
+  text-align: center;
+}
+
+div.toc {
+  background-color: gainsboro;
+  padding: 10pt;
+  border-style: inset;
+  border-color: #663333;
+  margin-top: 10pt;
+  margin-bottom: 30pt;
+}
+
+div.titletoc {
+  background-color: gainsboro;
+  padding: 10pt;
+  border-style: inset;
+  border-color: cornsilk;
+  margin-top: 10pt;
+  margin-bottom: 30pt;
+}
+
+div.date {
+  text-align: center;
+}
+
+div.org {
+  text-align: center;
+}
+
+div.author {
+  text-align: center;
+  font-weight: bold;
+}
+
+div.email {
+  text-align: center;
+}
+
+div.hp {
+  text-align: center;
+}
+
+div.summary {
+  color: white;
+  background: #9999FF;
+  border-style: inset;
+  border-color: gainsboro;
+  margin-top: 20pt;
+  margin-bottom: 20pt;
+  margin-left: 30pt;
+  margin-right: 30pt;
+  padding: 5pt;
+}
+
+div.comment {
+  color: red;
+  background: yellow;
+}
+
+span.comment {
+  color: red;
+  background: yellow;
+}
+
+div.navigator {
+  background: gainsboro;
+  border-top: 1pt solid black;
+  border-bottom: 1pt solid black;
+  text-align: center;
+  margin-top: 10pt;
+  margin-bottom: 10pt;
+}
+
+div.navigatortop {
+  background: gainsboro;
+  border-top: 1pt solid black;
+  border-bottom: 1pt solid black;
+  text-align: center;
+  margin-bottom: 10pt;
+}
+
+div.navigatorbottom {
+  background: gainsboro;
+  border-top: 1pt solid black;
+  border-bottom: 1pt solid black;
+  text-align: center;
+  margin-top: 10pt;
+}
+
+div.languages {
+  text-align: right;
+}
+
+div.footnote {
+  background: antiquewhite;
+}
+
+div.fyi {
+  color: black;
+  background: peachpuff;
+  padding: 5pt;
+  margin-top: 10pt;
+  margin-bottom: 10pt;
+}
+
+div.fyi div.title {
+  background: antiquewhite;
+  font-weight: bold;
+  padding: 5pt;
+  margin-top: 5pt;
+  margin-bottom: 5pt;
+}
+
+div.caption {
+  background: gainsboro
+  font-weight: bold;
+  padding: 5pd;
+  width: 300pt;
+  margin-top: 10pt;
+}
+
+div.result {
+  background: ivory;
+  border-style: inset;
+  border-color: #9999FF;
+  padding: 10pt;
+  margin-top: 10pt;
+  margin-bottom: 10pt;
+}
+
+span.caption {
+  background: lavender;
+  font-weight: bold;
+}
+
+pre.def {
+  border-style: solid;
+  border-width: 1px;
+  background-color: antiquewhite;
+  margin-left: 10pt;
+  margin-right: 10pt;
+  padding: 5pt;
+}
+
+
+pre.program {
+  background-color: gainsboro;
+  font-family: courier, monospace;
+  font-size: small;
+  padding: 5pt;
+  margin-right: 40pt;
+}
+
+pre.program em {
+  color: red;
+  font-style: normal;
+}
+
+pre.program strong {
+  color: red;
+  background-color: yellow;
+  font-style: normal;
+}
+
+pre.program span.keyword {
+  color: Blue;
+  font-style: normal;
+}
+
+pre.program span.primitive {
+  color: Green;
+  font-style: normal;
+}
+
+pre.program span.comment {
+  color: Red;
+  background-color: gainsboro;
+  font-style: normal;
+}
+
+pre.program span.quote {
+  color: OrangeRed;
+  font-style: normal;
+}
+
+var {
+  color: green;
+  font-style: italic;
+}
+
+tt {
+  font-family: courier, monospace;
+}
+
+code {
+  font-family: helvetica, sans-serif;
+  font-weight: bold;
+}
+
+pre.console {
+  background-color: black;
+  color: white;
+  font-family: courier, monospace;
+  padding: 5pt;
+  margin-right: 30pt;
+}
+
+pre.console kbd {
+  font-family: courier, monospace;
+  color: yellow;
+}
+
+span.toggle {
+  font-weight: bold;
+}
+
+div.figure {
+  text-align: center;
+}
+
+img.figure {
+  margin: 10pt;
+}
+
+div.equation {
+  margin-top: 1em;
+  margin-right: 30pt;
+  margin-bottom: 1em;
+  padding-top: 1em;
+  padding-left: 4em;
+  padding-bottom: 1em;
+  background: powderblue;
+}
+
+div.equation table {
+}
+
+div.equation table td.padding {
+  width:2em
+}
+
+td.equationNumber {
+  width: 4em;
+  text-align: right;
+}

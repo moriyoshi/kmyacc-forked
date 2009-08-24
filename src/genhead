@@ -1,0 +1,18 @@
+#!/bin/sh
+
+output=$1
+shift
+echo '#ifndef _'$output'_h' >temp.h
+echo '#define _'$output'_h' >>temp.h
+for i
+do
+	sed -n -f global1 $i >>temp.h
+done
+for i
+do
+	sed -n -f global2 $i >>temp.h
+done
+echo '#endif' >>temp.h
+cmp -s temp.h $output.h || mv temp.h $output.h
+rm -f temp.h
+exit 0

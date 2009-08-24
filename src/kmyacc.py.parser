@@ -1,0 +1,314 @@
+$semval($) yyval
+$semval($,%t) yyval
+$semval(%n) yyastk[yysp-(%l-%n)]
+$semval(%n,%t) yyastk[yysp-(%l-%n)]
+$include
+
+'''
+Prototype file of Python parser.
+Written by Yu Kobayashi
+This file is PUBLIC DOMAIN.
+'''
+
+buffer = ""
+token = ""
+toktype = ""
+YYDEFAULTSTACK = 512
+
+$tokenval
+%s = %n
+$endtokenval
+
+	
+'''
+	#define yyclearin (yychar = -1)
+	#define yyerrok (yyerrflag = 0)
+	#define YYRECOVERING (yyerrflag != 0)
+	#define YYERROR	goto yyerrlab
+'''
+
+
+''' Debug mode flag '''
+yydebug = False
+
+''' lexical element object '''
+yylval = None
+
+def yyprintln(msg):
+	print msg
+
+def yyflush():
+	dummy = 0
+
+$if -t
+yydebug = True
+
+yyterminals = [ \
+		$listvar terminals \
+		, "???" \
+		]
+
+
+def yytokname(n) :
+	$switch-for-token-name
+	else:
+		return "???"
+
+yyproduction = [ \
+	$production-strings \
+]
+
+
+''' Traditional Debug Mode '''
+def YYTRACE_NEWSTATE(state, sym):
+	if yydebug:
+		if sym < 0:
+			term = "--none--"
+		else:
+			term = yyterminals[sym]
+		yyprintln("% State " + str(state) + ", Lookahead " + term)
+
+def YYTRACE_READ(sym):
+	if yydebug:
+		yyprintln("% Reading " + yyterminals[sym])
+
+def YYTRACE_SHIFT(sym):
+	if yydebug:
+		yyprintln("% Shift " + yyterminals[sym])
+
+def YYTRACE_ACCEPT():
+	if (yydebug) :
+		yyprintln("% Accepted.")
+
+def YYTRACE_REDUCE(n):
+	if yydebug:
+		yyprintln("% Reduce by (" + str(n) + ") " + yyproduction[n])
+
+def YYTRACE_POP(state):
+	if yydebug:
+		yyprintln("% Recovering, uncovers state " + state)
+
+def YYTRACE_DISCARD(sym):
+	if yydebug:
+		yyprintln("% Discard " + yyterminals[sym])
+$endif
+
+
+yytranslate = [ \
+	$listvar yytranslate \
+	]
+
+YYBADCH = $(YYBADCH)
+YYMAXLEX = $(YYMAXLEX)
+YYTERMS = $(YYTERMS)
+YYNONTERMS = $(YYNONTERMS)
+
+yyaction = [ \
+	$listvar yyaction \
+	]
+
+YYLAST = $(YYLAST)
+
+yycheck = [ \
+	$listvar yycheck \
+	]
+
+yybase = [ \
+	$listvar yybase \
+	]
+
+YY2TBLSTATE = $(YY2TBLSTATE)
+
+yydefault = [ \
+	$listvar yydefault \
+	]
+
+
+
+yygoto = [ \
+	$listvar yygoto \
+	]
+
+YYGLAST = $(YYGLAST)
+
+yygcheck = [ \
+	$listvar yygcheck \
+	]
+
+yygbase = [ \
+	$listvar yygbase \
+	]
+
+yygdefault = [ \
+	$listvar yygdefault \
+	]
+
+yylhs = [ \
+	$listvar yylhs \
+	]
+
+yylen = [ \
+	$listvar yylen \
+	]
+
+YYSTATES = $(YYSTATES)
+YYNLSTATES = $(YYNLSTATES)
+YYINTERRTOK = $(YYINTERRTOK)
+YYUNEXPECTED = $(YYUNEXPECTED)
+YYDEFAULT = $(YYDEFAULT)
+
+'''
+Parser entry point
+'''
+
+def yyparse():
+	yyastk = range(YYDEFAULTSTACK)
+	yysstk = range(YYDEFAULTSTACK)
+
+	yystate = 0
+	yychar = -1
+
+	yysp = 0
+	yysstk[yysp] = 0
+	yyerrflag = 0
+	while True:
+$if -t
+		YYTRACE_NEWSTATE(yystate, yychar)
+$endif
+		if yybase[yystate] == 0:
+			yyn = yydefault[yystate]
+		else:
+			if yychar < 0:
+				yychar = yylex()
+				if yychar <= 0:
+					yychar = 0
+				if yychar < YYMAXLEX:
+					yychar = yytranslate[yychar]
+				else: 
+					yychar = YYBADCH
+$if -t
+				YYTRACE_READ(yychar)
+$endif
+			yyn = yybase[yystate] + yychar
+			goNext = yyn >= 0 and yyn < YYLAST and yycheck[yyn] == yychar
+			if not goNext:
+				goNext = yystate < YY2TBLSTATE
+				if goNext:
+					yyn = yybase[yystate + YYNLSTATES] + yychar
+					goNext = yyn >= 0 and yyn < YYLAST and yycheck[yyn] == yychar
+			if goNext:
+				yyn = yyaction[yyn]
+				goNext = yyn != YYDEFAULT
+			if goNext:
+				'''
+				 >= YYNLSTATE: shift and reduce
+				 > 0: shift
+				 = 0: accept
+				 < 0: reduce
+				 = -YYUNEXPECTED: error
+				 '''
+				if yyn > 0 :
+					''' shift '''
+$if -t
+					YYTRACE_SHIFT(yychar)
+$endif
+					yysp = yysp + 1
+
+					yysstk[yysp] = yystate = yyn
+					yyastk[yysp] = yylval
+					yychar = -1
+					
+					if yyerrflag > 0:
+						yyerrflag = yyerrflag - 1
+					if yyn < YYNLSTATES:
+						continue
+						
+					''' yyn >= YYNLSTATES means shift-and-reduce '''
+					yyn -= YYNLSTATES
+				else:
+					yyn = -yyn
+			else:
+				yyn = yydefault[yystate]
+		
+		while True:
+			''' reduce/error '''
+			if yyn == 0:
+				''' accept '''
+$if -t
+				YYTRACE_ACCEPT()
+$endif
+				yyflush()
+				return 0
+			elif yyn != YYUNEXPECTED:
+				''' reduce '''
+				yyl = yylen[yyn]
+				yyval = yyastk[yysp-yyl+1]
+$if -t
+				YYTRACE_REDUCE(yyn)
+$endif
+				''' Following line will be replaced by reduce actions '''
+$reduce
+				if yyn == %n:
+					%b
+$endreduce
+				''' Goto - shift nonterminal '''
+				yysp -= yyl
+				yyn = yylhs[yyn]
+				yyp = yygbase[yyn] + yysstk[yysp]
+				if yyp >= 0 and yyp < YYGLAST and yygcheck[yyp] == yyn:
+					yystate = yygoto[yyp]
+				else:
+					yystate = yygdefault[yyn]
+					
+				yysp = yysp + 1
+
+				yysstk[yysp] = yystate
+				yyastk[yysp] = yyval
+			else :
+				''' error '''
+				if yyerrflag == 0:
+					yyerror("syntax error")
+				if yyerrflag == 0 or yyerrflat == 1 or yyerrflag == 2:
+					yyerrflag = 3
+					''' Pop until error-expecting state uncovered '''
+
+					while True:
+						yyn = yybase[yystate] + YYINTERRTOK
+						b = yyn >= 0 and yyn < YYLAST and yycheck[yyn] == YYINTERRTOK
+						if not b:
+							b = yystate < YY2TBLSTATE
+							if b:
+								yyn = yybase[yystate + YYNLSTATES] + YYINTERRTOK
+								b = yyn >= 0 and yyn < YYLAST and yycheck[yyn] == YYINTERRTOK
+						if not b:
+							break
+						if yysp <= 0:
+							yyflush()
+							return 1
+						yysp = yysp - 1
+						yystate = yysstk[yysp]
+$if -t
+						YYTRACE_POP(yystate)
+$endif
+					yyn = yyaction[yyn]
+$if -t
+					YYTRACE_SHIFT(YYINTERRTOK)
+$endif
+					yysp = yysp + 1
+					yystate = yyn
+					yysstk[yysp] = yyn
+				elif yyerrflatcase == 3:
+$if -t
+					YYTRACE_DISCARD(yychar)
+$endif
+					if yychar == 0 :
+						yyflush()
+						return 1
+					yychar = -1
+				
+			if yystate < YYNLSTATES:
+				break
+			''' >= YYNLSTATES means shift-and-reduce '''
+			yyn = yystate - YYNLSTATES
+
+$tailcode

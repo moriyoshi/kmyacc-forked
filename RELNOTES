@@ -1,0 +1,13 @@
+2006.02.16: version 4.1.4:
+	Java, Perl, JavaScript版のパーサードライバのバグを修正。
+	このバグは、ある種の文法で構文解析に失敗し実行時エラーを起こすというもの。
+	C版にはこのバグはない。
+
+2005.10.07: version 4.1.3:
+	Java版に yyparsererror (YYERROR) 及びスタックの自動伸張を実装
+
+2005.07.09: version 4.1.2:
+	%pure_parser を追加、%typeにJavaのgeneric typeを許す
+
+2005.06.29: version 4.1.1:
+	 Perlをサポート

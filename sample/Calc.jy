@@ -1,0 +1,94 @@
+/*
+ * Integer calculator
+ */
+
+%{
+/* Place package & import here */
+%}
+
+
+%token NUMBER
+
+%type <Integer> expr NUMBER
+
+%left '+' '-'
+%left '*' '/'
+
+%%
+
+start:	lines;
+
+lines: /* empty */
+	| lines line { yylrec++; }
+        ;
+
+line	: expr '\n' { System.out.println($1); }
+	| '\n' { System.out.println("(empty line ignored)"); }
+	| error '\n'
+	;
+
+expr	: expr '+' expr { $$ = new Integer($1.intValue() + $3.intValue()); }
+	| expr '-' expr { $$ = new Integer($1.intValue() - $3.intValue()); }
+	| expr '*' expr { $$ = new Integer($1.intValue() * $3.intValue()); }
+	| expr '/' expr { $$ = new Integer($1.intValue() / $3.intValue()); }
+	| '(' expr ')' { $$ = $2; }
+	| NUMBER { $$ = $1; }
+	;
+
+%%
+
+/* Lexical analyzer */
+
+private int ch = 0;
+
+private int getch() {
+  int c = ch;
+  if (c != 0) {
+    ch = 0;
+    return c;
+  }
+  try {
+    return System.in.read();
+  } catch (java.io.IOException e) {
+    throw new Error(e.getMessage());
+  }
+}
+
+private void ungetch(int c) { ch = c; }
+
+int yylex() {
+  yylval = null;
+  for (;;) {
+    int c = getch();
+    if (c < 0)
+      return 0;
+    else if (c == ' ' || c == '\t')
+      ;
+    else if (Character.isDigit((char)c)) {
+      int n = 0;
+      char[] buf = new char[100];
+      while (Character.isDigit((char)c)) {
+        buf[n++] = (char)c;
+        c = getch();
+      }
+      ungetch(c);
+      yylval = new Integer(new String(buf, 0, n));
+      return NUMBER;
+    }
+    else
+      return c;
+  }
+}
+
+
+void yyerror(String msg) {
+  System.err.println(msg);
+}
+
+public static void main(String args[]) {
+  yydebug = true;
+  //  yyDumpParseTree = true;
+
+  Calc it = new Calc();
+  it.yyparse();
+}

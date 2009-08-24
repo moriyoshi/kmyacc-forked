@@ -1,0 +1,201 @@
+/* -*-c-*-  Prototype file of KM-yacc verifier. */
+
+
+$include;
+
+$declarations;
+
+static char *yytokname(n)
+int n;
+{
+    switch (n) {
+    $switch-for-token-name;
+    default:
+      return "???";
+    }
+}
+
+static char *yynontname(n)
+int n;
+{
+  switch (n) {
+  $switch-for-nonterminal-name;
+  default:
+    return "???";
+  }
+}
+
+
+static char *yyproduction[] = {
+  $production-strings;
+};
+
+$tables;
+
+$verification-table;
+
+/*
+ * Seek (st,ch) in action table, return true if found.
+ * param n position in yyaction
+ * param st current state
+ * param ch input token
+ */
+#if YYPROBEONCE
+#define found_in_action(n, st, ch) \
+  ((unsigned)(n = yybase[st] + (ch)) < YYLAST && yycheck[n] == (ch))
+#endif /* YYPROBEONCE */
+
+#if !YYPROBEONCE
+#define found_in_action(n, st, ch) \
+  (((unsigned)(n = yybase[st] + (ch)) < YYLAST && yycheck[n] == (ch)) \
+   || ((st) < YY2TBLSTATE \
+       && (unsigned)(n = yybase[(st) + YYNLSTATES] + (ch)) < YYLAST \
+       && yycheck[n] == (ch)))
+#endif /* !YYPROBEONCE */
+
+#define found_in_goto(n, st, ch) \
+  ((unsigned)(n = yygbase[ch] + (st)) < YYGLAST && yygcheck[n] == (ch))
+
+
+void printsym(str)
+char *str;
+{
+  printf(strlen(str) < 8 ? "\t%s\t\t" : "\t%s\t", str);
+}
+
+
+/*
+ * Verifier
+ */
+int main(int argc, char *argv[])
+{
+  int state;
+  int sym;
+  int act;
+  int n;
+  int p;
+
+  p = 0;
+  for (state = 0; state < YYNLSTATES; state++) {
+    printf("state %d\n\n", state);
+    for (sym = 0; sym < YYTERMS; sym++) {
+      if (found_in_action(n, state, sym) && (n = yyaction[n]) != YYDEFAULT) {
+        printsym(yytokname(sym));
+        if (n == -YYUNEXPECTED)
+          printf("error\n");
+        else if (n < 0)
+          printf("reduce (%d)\n", -n);
+        else if (n == 0)
+          printf("accept\n");
+        else if (n >= YYNLSTATES)
+          printf("shift and reduce (%d)\n", n - YYNLSTATES);
+        else
+          printf("shift %d\n", n);
+      }
+    }
+    while ((sym = yyvalidnonterms[p++]) >= 0) {
+      if (found_in_goto(n, state, sym))
+        n = yygoto[n];
+      else
+        n = yygdefault[sym];
+      printsym(yynontname(sym));
+      if (n >= YYNLSTATES)
+        printf("goto and reduce (%d)\n", n - YYNLSTATES);
+      else
+        printf("goto %d\n", n);
+    }
+
+    /* check default action */
+    n = yydefault[state];
+    printsym(".");
+    if (n == YYUNEXPECTED)
+      printf("error\n");
+    else
+      printf("reduce (%d)\n", n);
+    printf("\n");
+  }
+#if 0    
+      
+
+  p = 0;
+  while (yyverifytable[p] != -2) {
+    state = yyverifytable[p++];
+
+    printf("state %d\n", state);
+    for (;;) {
+      sym = yyverifytable[p++];
+      act = yyverifytable[p++];
+      if (sym < 0) break;
+
+      if (act > 0 && yyreduceonly[act] >= 0)
+        act = YYNLSTATES + yyreduceonly[act];
+
+      if (sym < YYNONTERMBASE) {
+        flags[sym] = state;
+        if (found_in_action(n, state, sym) && (n = yyaction[n]) != YYDEFAULT) {
+          if (n != act) {
+            printf("No match: sym=%s, act=%d, n=%d\n",
+                   yytokname(sym), act, n);
+          }
+          if (verbose) {
+            printsym(yytokname(sym));
+            if (n == -YYUNEXPECTED)
+              printf("error\n");
+            else if (n < 0)
+              printf("reduce (%d)\n", -n);
+            else if (n == 0)
+              printf("accept\n");
+            else if (n >= YYNLSTATES)
+              printf("shift and reduce (%d)\n", n - YYNLSTATES);
+            else
+              printf("shift %d\n", n);
+          }
+        } else {
+          printf("No match: sym=%s, act=%d, notfound\n",
+                   yytokname(sym), act);
+        }
+      } else {
+        sym -= YYNONTERMBASE;
+        if (found_in_goto(n, state, sym))
+          n = yygoto[n];
+        else
+          n = yygdefault[sym];
+        if (n != act) {
+          printf("No match: sym=%s, act=%d, n=%d\n",
+                 yynontname(sym), act, n);
+        }
+        if (verbose) {
+          printsym(yynontname(sym));
+          if (n >= YYNLSTATES)
+            printf("goto and reduce (%d)\n", n - YYNLSTATES);
+          else
+            printf("goto %d\n", n);
+        }
+      }
+    }
+
+    /* check other terminals */
+    for (sym = 0; sym < YYTERMS; sym++) {
+      if (flags[sym] != state) {
+        if (found_in_action(n, state, sym) && (n = yyaction[n]) != YYDEFAULT)
+          printf("No match: sym=%s, no act, n=%d\n", yytokname(sym), n);
+      }
+    }
+
+    /* check default action */
+    n = yydefault[state];
+    act = -act;
+    if (n != act)
+      printf("No match: default act=%d, n=%d\n", act, n);
+    if (verbose) {
+      printsym(".");
+      if (n == YYUNEXPECTED)
+        printf("error\n");
+      else
+        printf("reduce (%d)\n", n);
+    }
+  }
+#endif
+
+  return 0;
+}
