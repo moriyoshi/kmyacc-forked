@@ -124,7 +124,7 @@ global List *nreverse(List *p)
 global List *sortlist(List *p, int (*compar)())
 {
   List xh, yh, *xp, *yp, *x, *y;
-  uint n, xn, yn;
+  unsigned int n, xn, yn;
 
   /* L1. Separate list p into 2 lists. */
   xp = &xh;
